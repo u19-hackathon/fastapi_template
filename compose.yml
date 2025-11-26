@@ -1,0 +1,72 @@
+services:
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: nginx
+    restart: always
+    networks:
+      - app
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+    command: >
+      sh -c "rm -f /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+    depends_on:
+      - uvicorn
+
+  uvicorn:
+    build: .
+    container_name: uvicorn
+    restart: always
+    expose:
+      - 8443
+    env_file:
+      - .env.example
+    networks:
+      - app
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - redis
+      - mysql
+
+  mysql:
+    image: mysql:8.0.43
+    container_name: mysql
+    restart: always
+    volumes:
+      - mysql_data:/var/lib/mysql
+    env_file:
+      - .env.example
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_USER_PASSWORD}
+    networks:
+      - app
+    expose:
+      - 3306
+
+  redis:
+    image: redis:7.0-alpine
+    restart: always
+    expose:
+      - ${REDIS_PORT}
+    networks:
+      - app
+    env_file:
+      - .env.example
+    environment:
+      - REDIS_PORT=${REDIS_PORT}
+    volumes:
+      - redis_data:/data
+
+
+networks:
+  app:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
