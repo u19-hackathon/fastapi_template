@@ -3,10 +3,11 @@ import enum
 
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, func, Enum
 from sqlalchemy.orm import relationship, DeclarativeBase
-from src.modules.user.models import User
+
 
 class Base(DeclarativeBase):
     pass
+
 
 class File(Base):
     __tablename__ = "files"
@@ -31,9 +32,7 @@ class File(Base):
     source = relationship("Source", back_populates="files")
 
 
-
-
-#Enum для типа откуда отправлены файлы, уровень конфидициальности, уровень приоритета
+# Enum для типа откуда отправлены файлы, уровень конфидициальности, уровень приоритета
 class SourceType(enum.Enum):
     website = "website"
     email = "email"
@@ -41,11 +40,13 @@ class SourceType(enum.Enum):
     EDO = "EDO"
     ERP = "ERP"
 
+
 class PriorityLevel(enum.Enum):
     low = 'low'
     normal = 'normal'
     high = 'high'
     critical = 'critical'
+
 
 class ConfidentialityLevel(enum.Enum):
     open = 'open'
@@ -54,8 +55,7 @@ class ConfidentialityLevel(enum.Enum):
     strictly_confidential = 'strictly_confidential'
 
 
-
-#ORM для откуда файл
+# ORM для откуда файл
 class Source(Base):
     __tablename__ = "source"
 
@@ -66,8 +66,7 @@ class Source(Base):
     files = relationship("File", back_populates="source")
 
 
-
-#ORM для Категории файла
+# ORM для Категории файла
 class Category(Base):
     __tablename__ = "categories"
 
