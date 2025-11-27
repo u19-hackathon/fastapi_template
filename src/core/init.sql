@@ -50,6 +50,27 @@ CREATE TABLE files (
     FOREIGN KEY (source_id) REFERENCES source(id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
+-- Таблица тегов
+CREATE TABLE tags (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tag_name VARCHAR(100) UNIQUE NOT NULL,
+    tag_type ENUM('auto', 'manual') DEFAULT 'manual',
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+);
+
+-- Таблица многие ко многим по file_id, tag_id< user_id
+CREATE TABLE file_tags_users (
+    file_id INT NOT NULL,
+    tag_id INT NOT NULL,
+    assigned_by INT NULL,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (file_id, tag_id),
+    FOREIGN KEY (file_id) REFERENCES files(id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE,
+    FOREIGN KEY (assigned_by) REFERENCES users(id) ON DELETE SET NULL
+);
+
 -- ТЕСТОВЫЕ ДАННЫЕ
 INSERT INTO users (full_name, email, password, organization_name, position, department) VALUES
 ('Администратор Системы', 'admin@company.com', 'hashed_password_123', 'ООО "Тестовая Компания"', 'Администратор', 'ИТ'),
@@ -68,3 +89,20 @@ INSERT INTO categories (category_name, document_type, priority_level, confidenti
 ('Внутренние приказы', 'приказ', 'high', 'internal', 'Приказы по основной деятельности'),
 ('Служебные записки', 'письмо', 'low', 'internal', 'Внутренняя переписка'),
 ('Коммерческие предложения', 'письмо', 'normal', 'open', 'Письма клиентам');
+
+INSERT INTO files (title, file_path, first_lines, user_id, category_id, source_id) VALUES
+('Договор поставки №1', '/files/documents/contract1.pdf', 'ДОГОВОР ПОСТАВКИ...', 1, 1, 1),
+('Финансовый отчет за январь', '/files/reports/january.pdf', 'ОТЧЕТ О ПРИБЫЛИ...', 2, 2, 2);
+
+INSERT INTO tags (tag_name, tag_type, description) VALUES
+('срочный', 'manual', 'Требует немедленного внимания'),
+('отчет', 'auto', 'Финансовый или операционный отчет'),
+('договор', 'auto', 'Юридический документ'),
+('конфиденциально', 'manual', 'Содержит конфиденциальную информацию'),
+('архив', 'manual', 'Документ для архивного хранения');
+
+INSERT INTO file_tags_users (file_id, tag_id, assigned_by) VALUES
+(1, 1, 1),  -- файл 1 - срочный (назначил пользователь 1)
+(1, 2, NULL), -- файл 1 - отчет (авто-назначение)
+(2, 3, NULL), -- файл 2 - договор (авто-назначение)
+(2, 4, 2);  -- файл 2 - конфиденциально (назначил пользователь 2)

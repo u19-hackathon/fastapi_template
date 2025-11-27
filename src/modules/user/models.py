@@ -22,3 +22,4 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     files = relationship("File", back_populates="user")
+    assigned_tags = relationship("FileTag", back_populates="assigned_by_user")

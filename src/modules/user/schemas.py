@@ -1,7 +1,10 @@
-#user DTO
-from pydantic import BaseModel, EmailStr
+from typing import Annotated
+
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from datetime import datetime
-from typing import Optional
+import re
+
+
 
 class UserBase(BaseModel):
     full_name: str
@@ -10,19 +13,36 @@ class UserBase(BaseModel):
     position: str
     department: str
 
-class UserCreate(UserBase):
-    password: str
-
-class UserUpdate(BaseModel):
-    full_name: Optional[str] = None
-    email: Optional[EmailStr] = None
-    organization_name: Optional[str] = None
-    position: Optional[str] = None
-    department: Optional[str] = None
-
 class UserResponse(UserBase):
     id: int
     created_at: datetime
 
     class Config:
         from_attributes = True
+
+
+class UserRegister(UserBase):
+    password: Annotated[str, Field(min_length=8)]
+
+    @field_validator('password')
+    @classmethod
+    def password_strength(cls, v: str) -> str:
+        if not re.search(r'[A-Z]', v):
+            raise ValueError('Пароль должен содержать заглавные буквы')
+        if not re.search(r'[a-z]', v):
+            raise ValueError('Пароль должен содержать строчные буквы')
+        if not re.search(r'\d', v):
+            raise ValueError('Пароль должен содержать цифры')
+        return v
+
+    @field_validator('full_name')
+    @classmethod
+    def validate_full_name(cls, v: str) -> str:
+        if len(v.split()) < 2:
+            raise ValueError('Укажите имя и фамилию')
+        return v
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str

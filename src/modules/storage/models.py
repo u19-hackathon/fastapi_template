@@ -4,10 +4,8 @@ import enum
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, func, Enum
 from sqlalchemy.orm import relationship, DeclarativeBase
 
-
 class Base(DeclarativeBase):
     pass
-
 
 class File(Base):
     __tablename__ = "files"
@@ -30,9 +28,10 @@ class File(Base):
     user = relationship("User", back_populates="files")
     category = relationship("Category", back_populates="files")
     source = relationship("Source", back_populates="files")
+    tags = relationship("Tag", secondary="file_tags_users", back_populates="files")
 
 
-# Enum для типа откуда отправлены файлы, уровень конфидициальности, уровень приоритета
+#Enum для типа откуда отправлены файлы, уровень конфидициальности, уровень приоритета
 class SourceType(enum.Enum):
     website = "website"
     email = "email"
@@ -40,13 +39,11 @@ class SourceType(enum.Enum):
     EDO = "EDO"
     ERP = "ERP"
 
-
 class PriorityLevel(enum.Enum):
     low = 'low'
     normal = 'normal'
     high = 'high'
     critical = 'critical'
-
 
 class ConfidentialityLevel(enum.Enum):
     open = 'open'
@@ -55,7 +52,8 @@ class ConfidentialityLevel(enum.Enum):
     strictly_confidential = 'strictly_confidential'
 
 
-# ORM для откуда файл
+
+#ORM для откуда файл
 class Source(Base):
     __tablename__ = "source"
 
@@ -66,7 +64,8 @@ class Source(Base):
     files = relationship("File", back_populates="source")
 
 
-# ORM для Категории файла
+
+#ORM для Категории файла
 class Category(Base):
     __tablename__ = "categories"
 
@@ -78,3 +77,26 @@ class Category(Base):
     description = Column(Text)
 
     files = relationship("File", back_populates="category")
+
+
+class Tag(Base):
+    __tablename__ = "tags"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    tag_name = Column(String(100), unique=True, nullable=False)
+    tag_type = Column(Enum('auto', 'manual'), default='manual')
+    description = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    files = relationship("File", secondary="file_tags_users", back_populates="tags")
+
+class FileTag(Base):
+    __tablename__ = "file_tags_users"
+
+    file_id = Column(Integer, ForeignKey("files.id", ondelete="CASCADE"), primary_key=True)
+    tag_id = Column(Integer, ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True)
+    assigned_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    assigned_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Связи для удобства
+    assigned_by_user = relationship("User", back_populates="assigned_tags")
