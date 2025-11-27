@@ -22,13 +22,13 @@ CREATE TABLE source (
     source_type ENUM('website', 'email', 'scan', 'EDO', 'ERP') NOT NULL
 );
 
--- Таблица категорий С РУССКИМИ ENUM
+
 CREATE TABLE categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     category_name VARCHAR(255) UNIQUE NOT NULL,
     document_type VARCHAR(255) NOT NULL,
-    priority_level ENUM('низкий', 'обычный', 'высокий', 'критический') DEFAULT 'обычный',
-    confidentiality ENUM('открытый', 'внутренний', 'конфиденциальный', 'строго_конфиденциальный') DEFAULT 'внутренний',
+    priority_level ENUM('low', 'normal', 'high', 'critical') DEFAULT 'normal',
+    confidentiality ENUM('open', 'internal', 'confidential', 'strictly_confidential') DEFAULT 'internal',
     description TEXT
 );
 
@@ -63,8 +63,8 @@ INSERT INTO source (source_name, source_type) VALUES
 ('ERP система', 'ERP');
 
 INSERT INTO categories (category_name, document_type, priority_level, confidentiality, description) VALUES
-('Договоры поставки', 'договор', 'обычный', 'внутренний', 'Хозяйственные договоры с поставщиками'),
-('Финансовые отчеты', 'отчет', 'высокий', 'конфиденциальный', 'Ежемесячные финансовые отчеты'),
-('Внутренние приказы', 'приказ', 'высокий', 'внутренний', 'Приказы по основной деятельности'),
-('Служебные записки', 'письмо', 'низкий', 'внутренний', 'Внутренняя переписка'),
-('Коммерческие предложения', 'письмо', 'обычный', 'открытый', 'Письма клиентам');
+('Договоры поставки', 'договор', 'normal', 'internal', 'Хозяйственные договоры с поставщиками'),
+('Финансовые отчеты', 'отчет', 'high', 'confidential', 'Ежемесячные финансовые отчеты'),
+('Внутренние приказы', 'приказ', 'high', 'internal', 'Приказы по основной деятельности'),
+('Служебные записки', 'письмо', 'low', 'internal', 'Внутренняя переписка'),
+('Коммерческие предложения', 'письмо', 'normal', 'open', 'Письма клиентам');
