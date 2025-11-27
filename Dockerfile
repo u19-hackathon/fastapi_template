@@ -5,6 +5,7 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 WORKDIR /app
 COPY . .
+ENV PYTHONPATH=/app/src
 
 EXPOSE 8443
 

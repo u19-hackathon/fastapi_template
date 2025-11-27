@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import re
@@ -18,10 +17,10 @@ class PasswordManager:
     """
 
     def __init__(
-        self,
-        schemes: Sequence[str] | None = None,
-        deprecated: str = "auto",
-        bcrypt_rounds: int = 12,
+            self,
+            schemes: Sequence[str] | None = None,
+            deprecated: str = "auto",
+            bcrypt_rounds: int = 12,
     ) -> None:
 
         if schemes is None:
