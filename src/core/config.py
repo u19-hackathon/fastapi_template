@@ -3,7 +3,7 @@ import os
 
 from sqlalchemy import URL
 
-from core.exceptions import DatabaseConfigException
+from core.exceptions import DatabaseConfigException, JWTConfigException
 
 # подключение к БД
 DB_USER = os.environ.get("DB_USER")
@@ -24,3 +24,13 @@ SQLALCHEMY_DATABASE_URL = URL.create(
     port=DB_PORT,
     database=DB_NAME
 )
+
+
+# jwt конфигурация
+JWT_KEY = os.environ.get("JWT_KEY")
+JWT_ACCESS_EXPIRATION = int(os.environ.get("JWT_ACCESS_EXPIRATION"))
+JWT_REFRESH_EXPIRATION = int(os.environ.get("JWT_REFRESH_EXPIRATION"))
+JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM")
+
+if not all([JWT_KEY, JWT_ACCESS_EXPIRATION, JWT_REFRESH_EXPIRATION, JWT_ALGORITHM]):
+    raise JWTConfigException("Not enough data for jwt building")
