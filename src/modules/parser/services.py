@@ -47,7 +47,8 @@ _registry = ParserRegistry()
 
 def parse_file(path: str | Path) -> ParsedDocument:
     """
-    Главная точка входа: принимает путь к файлу, выбирает парсер и возвращает ParsedDocument.
+    Главная точка входа: принимает путь к файлу и возвращает ParsedDocument.
+    Этот метод будет использоваться модулем анализа.
     """
     p = Path(path)
     if not p.exists():

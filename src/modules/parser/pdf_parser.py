@@ -15,7 +15,7 @@ class PdfParser(BaseParser):
     """
     Парсер PDF-файлов.
     Работает с текстовыми PDF.
-    Для сканов понадобится OCR (потом).
+    Для сканов понадобится OCR (это уже другой модуль).
     """
 
     def supports(self, path: Path) -> bool:
@@ -45,6 +45,7 @@ class PdfParser(BaseParser):
             "last_modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
             "content_type": "application/pdf",
             "pages": str(len(reader.pages)),
+            "source_format": "pdf",
         }
 
         return ParsedDocument(

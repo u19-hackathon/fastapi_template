@@ -1,5 +1,0 @@
-Hello, Sergey!
-This is a test document for the parser.
-
-    There are some extra spaces here.
-And a last line.

@@ -30,6 +30,7 @@ class TxtParser(BaseParser):
             "size_bytes": str(stat.st_size),
             "last_modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
             "content_type": "text/plain",
+            "source_format": "txt",
         }
 
         return ParsedDocument(

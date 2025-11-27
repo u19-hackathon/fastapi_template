@@ -38,6 +38,7 @@ class DocxParser(BaseParser):
             "content_type": (
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             ),
+            "source_format": "docx",
         }
 
         return ParsedDocument(
