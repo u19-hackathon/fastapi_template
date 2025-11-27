@@ -6,14 +6,14 @@ import re
 
 
 
-class UserBase(BaseModel):
+class UserBaseDTO(BaseModel):
     full_name: str
     email: EmailStr
     organization_name: str
     position: str
     department: str
 
-class UserResponse(UserBase):
+class UserResponseDTO(UserBaseDTO):
     id: int
     created_at: datetime
 
@@ -21,7 +21,7 @@ class UserResponse(UserBase):
         from_attributes = True
 
 
-class UserRegister(UserBase):
+class UserRegisterDTO(UserBaseDTO):
     password: Annotated[str, Field(min_length=8)]
 
     @field_validator('password')
@@ -43,6 +43,6 @@ class UserRegister(UserBase):
         return v
 
 
-class UserLogin(BaseModel):
+class UserLoginDTO(BaseModel):
     email: EmailStr
     password: str

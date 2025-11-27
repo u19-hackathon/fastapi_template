@@ -3,14 +3,14 @@ from typing import Optional, List
 
 from pydantic import BaseModel
 
-from modules.storage.models import PriorityLevel, ConfidentialityLevel
+from src.modules.storage.models import PriorityLevel, ConfidentialityLevel
 
 
-class FileUpload(BaseModel):
+class FileUploadDTO(BaseModel):
     title: str
 
 
-class FileResponse(BaseModel):
+class FileResponseDTO(BaseModel):
     id: int
     title: str
     file_path: str
@@ -27,7 +27,8 @@ class FileResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class CategoryCreate(BaseModel):
+
+class CategoryCreateDTO(BaseModel):
     file_id: int
     priority_level: Optional[PriorityLevel] = None
     confidentiality: Optional[ConfidentialityLevel] = None
@@ -38,8 +39,10 @@ class TagBase(BaseModel):
     tag_name: str
     description: Optional[str] = None
 
+
 class TagCreate(TagBase):
     pass
+
 
 class TagResponse(TagBase):
     id: int

@@ -1,12 +1,16 @@
 # внедрение зависимостей, функции провайдеры для этого
-from core.config import JWT_KEY, JWT_ACCESS_EXPIRATION, JWT_REFRESH_EXPIRATION, JWT_ALGORITHM
-from modules.jwt.service import JWTService
-from core.security import PasswordManager
+from src.core.config import JWT_KEY, JWT_ACCESS_EXPIRATION, JWT_REFRESH_EXPIRATION, JWT_ALGORITHM
+from fastapi import Depends
+from src.modules.jwt.service import JWTService
+from src.core.security import PasswordManager
 from sqlalchemy.orm import Session
-from core.database import session_maker
+from src.core.database import session_maker
+
+from src.modules.user.repository import UserRepository
 
 _password_manager = PasswordManager()
 _jwt_service = JWTService(JWT_KEY, JWT_ACCESS_EXPIRATION, JWT_REFRESH_EXPIRATION, JWT_ALGORITHM)
+_user_repository = UserRepository
 
 
 def get_password_manager() -> PasswordManager:
@@ -24,3 +28,7 @@ def get_session() -> Session:
 
 def get_jwt_service() -> JWTService:
     return _jwt_service
+
+
+def get_user_repository(session: Session = Depends(get_session)) -> UserRepository:
+    return UserRepository(session)
