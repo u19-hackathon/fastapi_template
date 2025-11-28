@@ -3,15 +3,15 @@ from typing import Any
 
 from jose import JWTError, jwt
 
-from modules.jwt.util import TokenType
+from src.modules.jwt.util import TokenType
 
 
 class JWTService:
     def __init__(self, key, access_expiration, refresh_expiration, algorithm):
         self.__key = key
         self.__expiration = {
-            TokenType.ACCESS: access_expiration,
-            TokenType.REFRESH: refresh_expiration
+            TokenType.ACCESS.value: access_expiration,
+            TokenType.REFRESH.value: refresh_expiration
         }
         self.__algorithm = algorithm
 
@@ -20,7 +20,7 @@ class JWTService:
             "type": token_type.value,
             "sub": str(user_id),
             "role": role,
-            "exp": datetime.now(timezone.utc) + timedelta(minutes=self.__expiration[token_type]),
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=self.__expiration[token_type.value]),
             "iat": datetime.now(timezone.utc),
         }
         encoded_jwt = jwt.encode(payload, self.__key, algorithm=self.__algorithm)

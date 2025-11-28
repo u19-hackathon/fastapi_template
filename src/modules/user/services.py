@@ -43,7 +43,7 @@ class UserService:
         )
 
     def validate_password(self, plain_password: str, hashed_password: str):
-        self.__password_manager.verify_password(plain_password=plain_password, hashed_password=hashed_password)
+        return self.__password_manager.verify_password(plain_password=plain_password, hashed_password=hashed_password)
 
     def delete_user(self, user_id) -> None:
         self.__user_repository.delete_user(user_id)
