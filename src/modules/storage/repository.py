@@ -1,13 +1,16 @@
 from typing import List, Optional
 
-from src.modules.storage.models import File, Tag, FileTag
+from sqlalchemy.orm import Session, Query
+
+from src.modules.storage.models import File, Tag, FileTag, Source
 from src.modules.user.models import User
 from sqlalchemy import select, func
+from sqlalchemy import exists
 
 
 class StorageRepository:
-    def __init__(self, session):
-        self.__session = session
+    def __init__(self, session: Session):
+        self.__session: Session = session
 
     def create_file(self,
                     title: str,
@@ -174,24 +177,22 @@ class StorageRepository:
 
     def get_files_by_filters(
             self,
-            user_id: Optional[int] = None,
+            user_id: int,
             file_type: Optional[str] = None,
             tags: Optional[List[str]] = None,
             counterparty: Optional[str] = None
     ) -> List[File]:
-
-        query = self.__session.query(File)
-        print(query)
-        if user_id:
-            query = query.filter(File.user_id == user_id)
+        query: Query = self.__session.query(File).filter(File.source_id == user_id)
         if file_type:
             query = query.filter(File.file_type == file_type)
-        all_tags = []
         if tags:
-            all_tags.extend(tags)
+            query = query.filter(
+                *[exists().where(
+                    (FileTag.file_id == File.id) &
+                    (FileTag.tag_id == Tag.id) &
+                    (Tag.tag_name == tag)
+                ) for tag in tags]
+            )
         if counterparty:
-            all_tags.append(counterparty)
-        if all_tags:
-            for tag_name in all_tags:
-                query = query.filter(File.tags.any(tag_name=tag_name))
+            query = query.join(Source).filter(Source.source_name == counterparty)
         return query.all()
