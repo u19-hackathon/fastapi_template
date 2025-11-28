@@ -2,8 +2,7 @@
 import os
 
 from sqlalchemy import URL
-
-from core.exceptions import DatabaseConfigException, JWTConfigException
+from src.core.exceptions import DatabaseConfigException, JWTConfigException
 
 # подключение к БД
 DB_USER = os.environ.get("DB_USER")
@@ -24,7 +23,6 @@ SQLALCHEMY_DATABASE_URL = URL.create(
     port=DB_PORT,
     database=DB_NAME
 )
-
 
 # jwt конфигурация
 JWT_KEY = os.environ.get("JWT_KEY")

@@ -5,8 +5,8 @@ from datetime import datetime
 import re
 
 
-
 class UserBaseDTO(BaseModel):
+    id: int
     full_name: str
     email: EmailStr
     organization_name: str
@@ -14,7 +14,6 @@ class UserBaseDTO(BaseModel):
     department: str
 
 class UserResponseDTO(UserBaseDTO):
-    id: int
     created_at: datetime
 
     class Config:
