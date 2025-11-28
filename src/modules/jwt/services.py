@@ -38,3 +38,10 @@ class JWTService:
         if not payload:
             return None
         return payload.get(credential_name)
+
+    def check_valid(self, token):
+        try:
+            jwt.decode(token, self.__key, algorithms=[self.__algorithm])
+            return True
+        except JWTError:
+            return False

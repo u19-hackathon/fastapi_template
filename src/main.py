@@ -3,7 +3,7 @@ from fastapi.params import Depends
 from fastapi.responses import HTMLResponse
 
 from core.dependencies import get_jwt_service
-from src.modules.jwt.service import JWTService
+from src.modules.jwt.services import JWTService
 from src.modules.jwt.util import TokenType
 from src.modules.user.routers import user_router
 

@@ -32,3 +32,5 @@ JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM")
 
 if not all([JWT_KEY, JWT_ACCESS_EXPIRATION, JWT_REFRESH_EXPIRATION, JWT_ALGORITHM]):
     raise JWTConfigException("Not enough data for jwt building")
+
+FILE_SAVE_BASE_PATH = os.environ.get("FILE_SAVE_BASE_PATH")
