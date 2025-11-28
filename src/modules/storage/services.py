@@ -1,7 +1,9 @@
+from fastapi import UploadFile
+
 from src.modules.file_save_service.file_save_service import FileSaveService
 from src.modules.parser import ParserRegistry
+from src.modules.storage.models import File
 from src.modules.storage.repository import StorageRepository
-from src.modules.storage.schemas import FileUploadDTO, FileResponseDTO
 
 
 class StorageService:
@@ -12,23 +14,25 @@ class StorageService:
                  file_analyzer: callable,
                  hasher: callable
                  ):
-        self.__file_repository: StorageRepository = file_repository
+        self.__storage_repository: StorageRepository = file_repository
         self.__file_save_service: FileSaveService = file_save_service
         self.__parser_registry = parser_registry
         self.__file_analyzer = file_analyzer
         self.__hasher = hasher
 
-    def create_file(self, file_upload_dto: FileUploadDTO, user_id: int):
+    def create_files(self, user_id: int, file_upload: list[UploadFile]):
         """
         Функция для создания нового файла. Идея в том, что именно она будет отсеивать дубликаты,
         так же она будет не только принимать параметры и теги от пользователя, но и через анализатор
         находить новые
         """
-        pass
+        # self.__parser_registry.parse_d(file_upload)
 
-    def get_list_of_user_files(self, ) -> list[FileResponseDTO]:
+    def get_list_of_user_files(self, user_id: int, file_type: str, tags: list[str], counterparty: str) -> list[
+        File]:
         """
         Функция для получения списка файлов пользователя. Здесь должна быть поддержка фильтров.
         Должна возвращать список dto_response_file
         """
-        pass
+        files = self.__storage_repository.get_files_by_filters(user_id, file_type, tags, counterparty)
+        return files

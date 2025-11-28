@@ -10,16 +10,16 @@ class StorageRepository:
         self.__session = session
 
     def create_file(self,
-        title : str,
-        file_path: str,
-        file_size: int,
-        file_type: str,
-        file_hash: str,
-        user_id: int,
-        category_id: int,
-        source_id: int,
-        first_lines: Optional[str] = None,
-    ) -> File:
+                    title: str,
+                    file_path: str,
+                    file_size: int,
+                    file_type: str,
+                    file_hash: str,
+                    user_id: int,
+                    category_id: int,
+                    source_id: int,
+                    first_lines: Optional[str] = None,
+                    ) -> File:
         db_file = File(
             title=title,
             file_path=file_path,
@@ -68,12 +68,14 @@ class StorageRepository:
         return res.scalars().all()
 
     def get_files_by_category_paginated(self, category_id: int, skip: int = 0, limit: int = 100) -> List[File]:
-        stmt = select(File).where(File.category_id == category_id).order_by(File.last_modified.desc()).offset(skip).limit(limit)
+        stmt = select(File).where(File.category_id == category_id).order_by(File.last_modified.desc()).offset(
+            skip).limit(limit)
         res = self.__session.execute(stmt)
         return res.scalars().all()
 
     def get_files_by_tag_id(self, tag_id: int) -> List[File]:
-        stmt = select(File).join(FileTag, File.id == FileTag.file_id).where(FileTag.tag_id == tag_id).order_by(File.last_modified.desc())
+        stmt = select(File).join(FileTag, File.id == FileTag.file_id).where(FileTag.tag_id == tag_id).order_by(
+            File.last_modified.desc())
         res = self.__session.execute(stmt)
         return res.scalars().all()
 
@@ -82,7 +84,6 @@ class StorageRepository:
             File.last_modified.desc()).offset(skip).limit(limit)
         res = self.__session.execute(stmt)
         return res.scalars().all()
-
 
     def get_files_by_tag_id_list(self, tag_id_list: List[int]) -> List[File]:
         stmt = select(File).join(FileTag, File.id == FileTag.file_id).where(FileTag.tag_id.in_(tag_id_list)).order_by(
@@ -102,7 +103,8 @@ class StorageRepository:
         return res.scalars().all()
 
     def get_files_by_source_paginated(self, source_id: int, skip: int = 0, limit: int = 100) -> List[File]:
-        stmt = select(File).where(File.source_id == source_id).order_by(File.last_modified.desc()).offset(skip).limit(limit)
+        stmt = select(File).where(File.source_id == source_id).order_by(File.last_modified.desc()).offset(skip).limit(
+            limit)
         res = self.__session.execute(stmt)
         return res.scalars().all()
 
@@ -120,12 +122,11 @@ class StorageRepository:
         self.__session.commit()
         return True
 
-
     def create_tag(self,
-        tag_name: str,
-        tag_type: str = 'manual',
-        description: Optional[str] = None
-    ) -> Tag:
+                   tag_name: str,
+                   tag_type: str = 'manual',
+                   description: Optional[str] = None
+                   ) -> Tag:
         db_tag = Tag(
             tag_name=tag_name,
             tag_type=tag_type,
@@ -161,7 +162,7 @@ class StorageRepository:
         self.__session.commit()
         return True
 
-    def get_file_tags(self, file_id : int) -> List[Tag]:
+    def get_file_tags(self, file_id: int) -> List[Tag]:
         stmt = select(Tag).join(FileTag, Tag.id == FileTag.tag_id).where(FileTag.file_id == file_id).order_by(Tag.id)
         result = self.__session.execute(stmt)
         return result.scalars().all()
@@ -170,3 +171,27 @@ class StorageRepository:
         stmt = select(func.count(File.id)).where(File.user_id == user_id)
         res = self.__session.execute(stmt)
         return res.scalar()
+
+    def get_files_by_filters(
+            self,
+            user_id: Optional[int] = None,
+            file_type: Optional[str] = None,
+            tags: Optional[List[str]] = None,
+            counterparty: Optional[str] = None
+    ) -> List[File]:
+
+        query = self.__session.query(File)
+        print(query)
+        if user_id:
+            query = query.filter(File.user_id == user_id)
+        if file_type:
+            query = query.filter(File.file_type == file_type)
+        all_tags = []
+        if tags:
+            all_tags.extend(tags)
+        if counterparty:
+            all_tags.append(counterparty)
+        if all_tags:
+            for tag_name in all_tags:
+                query = query.filter(File.tags.any(tag_name=tag_name))
+        return query.all()

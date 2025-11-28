@@ -12,8 +12,8 @@ from .models import (
 
 
 def build_tags_from_metadata(
-    meta: FileMetadata,
-    existing_manual_tag_names: Iterable[str] | None = None,
+        meta: FileMetadata,
+        existing_manual_tag_names: Iterable[str] | None = None,
 ) -> List[TagResult]:
     """
     Строит список авто-тегов на основе метаданных файла
@@ -34,7 +34,6 @@ def build_tags_from_metadata(
             )
         )
 
-    # 1) Тип документа → "договор"
     doc_type = (meta.category_document_type or "").lower()
     if "договор" in doc_type:
         add_tag("договор", f"Тип документа: {meta.category_document_type}")
