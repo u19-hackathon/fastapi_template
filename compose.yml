@@ -9,8 +9,23 @@ services:
       - "80:80"
     volumes:
       - ./nginx:/etc/nginx/conf.d
+      - ./front/dist:/usr/share/nginx/html
     command: >
       sh -c "rm -f /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+    depends_on:
+      - uvicorn
+
+  node:
+    build: ./front
+    container_name: node
+    expose:
+      - 8080
+    env_file:
+      - .env
+    networks:
+      - app
+    volumes:
+      - ./front:/app
     depends_on:
       - uvicorn
 

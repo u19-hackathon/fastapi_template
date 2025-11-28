@@ -1,0 +1,17 @@
+{
+  "name": "node-app-by-timeweb",
+  "description": "node with docker",
+  "version": "1.0.0",
+  "main": "timeweb.js",
+  "keywords": [
+    "nodejs",
+    "express",
+    "docker"
+  ],
+  "dependencies": {
+    "express": "^4.16.4"
+  },
+  "scripts": {
+    "start": "node timeweb.js"
+  }
+}
