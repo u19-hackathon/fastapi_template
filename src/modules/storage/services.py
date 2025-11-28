@@ -26,7 +26,7 @@ class StorageService:
         так же она будет не только принимать параметры и теги от пользователя, но и через анализатор
         находить новые
         """
-        # self.__parser_registry.parse_d(file_upload)
+        # self.__parser_registry.(file_upload)
 
     def get_list_of_user_files(self, user_id: int, file_type: str, tags: list[str], counterparty: str) -> list[
         File]:

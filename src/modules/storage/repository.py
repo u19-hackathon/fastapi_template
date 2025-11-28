@@ -182,17 +182,14 @@ class StorageRepository:
             tags: Optional[List[str]] = None,
             counterparty: Optional[str] = None
     ) -> List[File]:
-        query: Query = self.__session.query(File).filter(File.source_id == user_id)
+        query = self.__session.query(File)
+        if user_id:
+            query = query.filter(File.user_id == user_id)
         if file_type:
             query = query.filter(File.file_type == file_type)
         if tags:
-            query = query.filter(
-                *[exists().where(
-                    (FileTag.file_id == File.id) &
-                    (FileTag.tag_id == Tag.id) &
-                    (Tag.tag_name == tag)
-                ) for tag in tags]
-            )
+            for tag in tags:
+                query = query.filter(File.tags.any(tag_name=tag))
         if counterparty:
-            query = query.join(Source).filter(Source.source_name == counterparty)
+            query = query.filter(File.tags.any(tag_name=counterparty))
         return query.all()
