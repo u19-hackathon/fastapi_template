@@ -1,0 +1,170 @@
+@import '../variables.css';
+
+.register-view {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #c9d0ef 0%, #2c3e50 100%);
+  padding: 10px 0; /* Добавляем отступы сверху и снизу */
+}
+
+.register-container {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px; /* Уменьшаем padding */
+}
+
+.register-card {
+  background: white;
+  border-radius: 10px;
+  padding: 30px; /* Уменьшаем с 40px до 30px */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.register-header {
+  text-align: center;
+  margin-bottom: 20px; /* Уменьшаем с 30px */
+}
+
+.register-header h1 {
+  color: #2c3e50;
+  margin-bottom: 8px; /* Уменьшаем отступ */
+  font-size: 22px; /* Немного уменьшаем шрифт */
+}
+
+.register-header p {
+  color: #7f8c8d;
+  font-size: 13px; /* Уменьшаем шрифт */
+  margin-bottom: 0;
+}
+
+.register-form {
+  margin-bottom: 15px; /* Уменьшаем отступ */
+}
+
+.form-group {
+  margin-bottom: 12px; /* Уменьшаем с 15px */
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 4px; /* Уменьшаем отступ */
+  font-weight: bold;
+  color: #333;
+  font-size: 13px; /* Немного уменьшаем шрифт */
+}
+
+.form-input {
+  width: 100%;
+  padding: 8px 10px; /* Уменьшаем padding */
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  height: 40px; /* Фиксируем высоту */
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.register-btn {
+  width: 100%;
+  padding: 10px; /* Уменьшаем с 12px */
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 15px; /* Немного уменьшаем */
+  cursor: pointer;
+  margin-bottom: 12px; /* Уменьшаем */
+  height: 42px; /* Фиксируем высоту */
+}
+
+.register-btn:hover:not(:disabled) {
+  background: #2980b9;
+}
+
+.register-btn:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.login-section {
+  text-align: center;
+  margin-bottom: 15px; /* Уменьшаем */
+  padding-top: 12px; /* Уменьшаем */
+  border-top: 1px solid #eee;
+}
+
+.login-text {
+  color: #7f8c8d;
+  margin-bottom: 8px; /* Уменьшаем */
+  font-size: 13px; /* Уменьшаем шрифт */
+}
+
+.login-btn {
+  width: 100%;
+  padding: 10px; /* Уменьшаем с 12px */
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 15px; /* Уменьшаем шрифт */
+  cursor: pointer;
+  transition: background-color 0.3s;
+  height: 42px; /* Фиксируем высоту */
+}
+
+.login-btn:hover {
+  background: #5a6268;
+}
+
+.error-message {
+  background-color: #fee;
+  color: #c33;
+  padding: 8px 10px; /* Уменьшаем padding */
+  border-radius: 4px;
+  margin-bottom: 12px; /* Уменьшаем */
+  font-size: 13px; /* Уменьшаем шрифт */
+  border: 1px solid #fcc;
+}
+
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 8px 10px; /* Уменьшаем padding */
+  border-radius: 4px;
+  margin-bottom: 12px; /* Уменьшаем */
+  font-size: 13px; /* Уменьшаем шрифт */
+  border: 1px solid #c3e6cb;
+}
+
+/* Для очень маленьких экранов */
+@media (max-height: 700px) {
+  .register-view {
+    padding: 10px 0;
+    align-items: flex-start; /* Выравниваем по верху на маленьких экранах */
+  }
+  
+  .register-card {
+    padding: 20px; /* Еще меньше padding */
+  }
+  
+  .form-group {
+    margin-bottom: 8px; /* Минимальные отступы */
+  }
+  
+  .form-input {
+    padding: 6px 8px;
+    height: 36px;
+  }
+  
+  .register-btn,
+  .login-btn {
+    padding: 8px;
+    height: 38px;
+    font-size: 14px;
+  }
+}

@@ -27,7 +27,7 @@ services:
       - app
 #    volumes:
 #      - ./front:/app
-    command: npm start  # явно указываем команду
+    command: npm run dev  # явно указываем команду
     depends_on:
       - uvicorn
 
@@ -35,6 +35,18 @@ services:
     build: .
     container_name: uvicorn
     restart: always
+
+
+
+
+    ports: # Добавьте это
+      - "8443:8443"  # Проброс порта на хост
+
+
+
+
+
+
     expose:
       - 8443
     env_file:

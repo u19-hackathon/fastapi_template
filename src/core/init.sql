@@ -1,5 +1,7 @@
 -- Установка кодировки
-SET NAMES utf8mb4;
+SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE DATABASE IF NOT EXISTS db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE db;
 
@@ -52,7 +54,7 @@ CREATE TABLE files (
     FOREIGN KEY (category_id) REFERENCES categories(id) ON UPDATE CASCADE ON DELETE RESTRICT,
     FOREIGN KEY (source_id) REFERENCES source(id) ON UPDATE CASCADE ON DELETE RESTRICT,
 
-    INDEX idx_file_hash (file_hash),
+    INDEX idx_file_hash (file_hash)
 );
 
 -- Таблица тегов

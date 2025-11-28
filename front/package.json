@@ -1,17 +1,19 @@
 {
-  "name": "node-app-by-timeweb",
-  "description": "node with docker",
+  "name": "doc-hub-frontend",
+  "private": true,
   "version": "1.0.0",
-  "main": "timeweb.js",
-  "keywords": [
-    "nodejs",
-    "express",
-    "docker"
-  ],
-  "dependencies": {
-    "express": "^4.16.4"
-  },
+  "type": "module",
   "scripts": {
-    "start": "node timeweb.js"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.3.0",
+    "vue-router": "^4.2.0"
+  },
+  "devDependencies": {
+    "vite": "^4.4.0",
+    "@vitejs/plugin-vue": "^4.2.0"
   }
 }
