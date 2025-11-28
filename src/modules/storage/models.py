@@ -1,7 +1,7 @@
 # ORM модели для взаимодействия с БД
 import enum
 
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, func, Enum
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, func, Enum, Index
 from sqlalchemy.orm import relationship, DeclarativeBase
 
 class Base(DeclarativeBase):
@@ -16,6 +16,7 @@ class File(Base):
     first_lines = Column(Text)
     file_size = Column(Integer)
     file_type = Column(String(50))
+    file_hash = Column(String(64), nullable=True)
     upload_date = Column(DateTime(timezone=True), server_default=func.now())
     last_modified = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
@@ -29,6 +30,8 @@ class File(Base):
     category = relationship("Category", back_populates="files")
     source = relationship("Source", back_populates="files")
     tags = relationship("Tag", secondary="file_tags_users", back_populates="files")
+
+Index('idx_file_hash', File.file_hash)
 
 
 #Enum для типа откуда отправлены файлы, уровень конфидициальности, уровень приоритета

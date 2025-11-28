@@ -40,14 +40,19 @@ CREATE TABLE files (
     first_lines TEXT,
     file_size INT,
     file_type VARCHAR(50),
+    file_hash VARCHAR(64) NULL,
     upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
     user_id INT NOT NULL,
     category_id INT NOT NULL,
     source_id INT NOT NULL,
+
     FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (source_id) REFERENCES source(id) ON UPDATE CASCADE ON DELETE RESTRICT
+    FOREIGN KEY (source_id) REFERENCES source(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+
+    INDEX idx_file_hash (file_hash),
 );
 
 -- Таблица тегов
@@ -56,7 +61,7 @@ CREATE TABLE tags (
     tag_name VARCHAR(100) UNIQUE NOT NULL,
     tag_type ENUM('auto', 'manual') DEFAULT 'manual',
     description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Таблица многие ко многим по file_id, tag_id< user_id

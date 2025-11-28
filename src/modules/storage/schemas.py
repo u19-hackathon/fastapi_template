@@ -15,6 +15,7 @@ class FileResponseDTO(BaseModel):
     title: str
     file_path: str
     file_type: str
+    file_hash: Optional[str] = None
     upload_date: datetime
     first_lines: str
     last_modified: datetime
