@@ -1,14 +1,11 @@
 # ORM модели для взаимодействия с БД
-
 from sqlalchemy import String, Column, Integer, DateTime, func
-from sqlalchemy.orm import DeclarativeBase, relationship
+from sqlalchemy.orm import relationship
+
+from src.core.database import Base
 
 
-class Base(DeclarativeBase):
-    pass
-
-
-#ORM для юзера
+# ORM для юзера
 class User(Base):
     __tablename__ = 'users'
 

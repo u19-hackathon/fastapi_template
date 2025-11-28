@@ -2,10 +2,10 @@
 import enum
 
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, func, Enum, Index
-from sqlalchemy.orm import relationship, DeclarativeBase
+from sqlalchemy.orm import relationship
 
-class Base(DeclarativeBase):
-    pass
+from src.core.database import Base
+
 
 class File(Base):
     __tablename__ = "files"
@@ -31,10 +31,11 @@ class File(Base):
     source = relationship("Source", back_populates="files")
     tags = relationship("Tag", secondary="file_tags_users", back_populates="files")
 
+
 Index('idx_file_hash', File.file_hash)
 
 
-#Enum для типа откуда отправлены файлы, уровень конфидициальности, уровень приоритета
+# Enum для типа откуда отправлены файлы, уровень конфидициальности, уровень приоритета
 class SourceType(enum.Enum):
     website = "website"
     email = "email"
@@ -42,11 +43,13 @@ class SourceType(enum.Enum):
     EDO = "EDO"
     ERP = "ERP"
 
+
 class PriorityLevel(enum.Enum):
     low = 'low'
     normal = 'normal'
     high = 'high'
     critical = 'critical'
+
 
 class ConfidentialityLevel(enum.Enum):
     open = 'open'
@@ -55,8 +58,7 @@ class ConfidentialityLevel(enum.Enum):
     strictly_confidential = 'strictly_confidential'
 
 
-
-#ORM для откуда файл
+# ORM для откуда файл
 class Source(Base):
     __tablename__ = "source"
 
@@ -67,8 +69,7 @@ class Source(Base):
     files = relationship("File", back_populates="source")
 
 
-
-#ORM для Категории файла
+# ORM для Категории файла
 class Category(Base):
     __tablename__ = "categories"
 
@@ -92,6 +93,7 @@ class Tag(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     files = relationship("File", secondary="file_tags_users", back_populates="tags")
+
 
 class FileTag(Base):
     __tablename__ = "file_tags_users"

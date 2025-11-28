@@ -18,13 +18,12 @@ async def get_user(
         jwt_service: JWTService = Depends(get_jwt_service)
 ) -> UserResponseDTO:
     payload = jwt_service.decode_token(token=user_jwt)
-    if payload.get("type"):
+    if not payload:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    if not payload.get("type"):
         raise HTTPException(status_code=401, detail="Unauthorized")
     if payload.get("type") != "access":
         raise HTTPException(status_code=401, detail="Unauthorized")
-    if not payload:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
     if int(payload.get("sub", -1)) != user_id:
         raise HTTPException(status_code=403, detail="Not enough rights")
 
@@ -85,7 +84,7 @@ async def delete_user(
     payload = jwt_service.decode_token(token=user_jwt)
     if not payload:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    if payload.get("type"):
+    if not payload.get("type"):
         raise HTTPException(status_code=401, detail="Unauthorized")
     if payload.get("type") != "access":
         raise HTTPException(status_code=401, detail="Unauthorized")
