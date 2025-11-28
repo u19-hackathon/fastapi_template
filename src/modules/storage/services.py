@@ -42,3 +42,12 @@ class StorageService:
 
     def get_file_by_id(self, file_id: int):
         return self.__storage_repository.get_file_by_id(file_id)
+
+    def get_all_types(self):
+        return self.__storage_repository.get_all_types()
+
+    def get_all_tags(self):
+        return self.__storage_repository.get_all_tags()
+
+    def get_all_counterparty(self):
+        return self.__storage_repository.get_all_counterparty()

@@ -1,8 +1,9 @@
 from typing import List, Optional, Type
 
+from dns.e164 import query
 from sqlalchemy.orm import Session, Query, joinedload
 
-from src.modules.storage.models import File, Tag, FileTag, Source
+from src.modules.storage.models import File, Tag, FileTag, Source, Category
 from src.modules.user.models import User
 from sqlalchemy import select, func
 from sqlalchemy import exists
@@ -196,4 +197,16 @@ class StorageRepository:
                 query = query.filter(File.tags.any(tag_name=tag))
         if counterparty:
             query = query.filter(File.tags.any(tag_name=counterparty))
+        return query.all()
+
+    def get_all_types(self):
+        query = self.__session.query(Category)
+        return query.all()
+
+    def get_all_tags(self):
+        query = self.__session.query(Tag).where(Tag.tag_name != "контрагент")
+        return query.all()
+
+    def get_all_counterparty(self):
+        query = self.__session.query(Tag).where(Tag.tag_name == "контрагент")
         return query.all()

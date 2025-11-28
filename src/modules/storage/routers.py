@@ -7,7 +7,8 @@ from fastapi import Query
 from src.core.dependencies import get_jwt_service, get_storage_service, \
     get_authentication_header
 from src.modules.jwt.services import JWTService
-from src.modules.storage.schemas import FileResponseDTO
+from src.modules.storage.models import Tag, Category
+from src.modules.storage.schemas import FileResponseDTO, TagResponseDTO, CategoryResponseDTO
 from src.modules.storage.services import StorageService
 
 storage_router = APIRouter(prefix="/api/storage")
@@ -84,3 +85,36 @@ async def delete_file(
         raise HTTPException(status_code=403, detail="Forbidden")
     storage_service.delete_file(file_id)
     return None
+
+
+type_controller = APIRouter(prefix="/api/type")
+
+
+@type_controller.get("")
+async def get_all_types(
+        storage_service: StorageService = Depends(get_storage_service)
+) -> list[CategoryResponseDTO]:
+    types = storage_service.get_all_types()
+    return [CategoryResponseDTO.model_validate(cat) for cat in types]
+
+
+tag_controller = APIRouter(prefix="/api/tag")
+
+
+@tag_controller.get("")
+async def get_all_tags(
+        storage_service: StorageService = Depends(get_storage_service)
+) -> list[TagResponseDTO]:
+    tags = storage_service.get_all_tags()
+    return [TagResponseDTO.model_validate(tag) for tag in tags]
+
+
+counterparty_controller = APIRouter(prefix="/api/counterparty")
+
+
+@counterparty_controller.get("")
+async def get_all_counterparty(
+        storage_service: StorageService = Depends(get_storage_service)
+) -> list[TagResponseDTO]:
+    counterparties = storage_service.get_all_counterparty()
+    return [TagResponseDTO.model_validate(tag) for tag in counterparties]
