@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 from datetime import datetime
@@ -6,12 +6,13 @@ import re
 
 
 class UserBaseDTO(BaseModel):
-    id: int
+    id: Optional[int] = None
     full_name: str
     email: EmailStr
     organization_name: str
     position: str
     department: str
+
 
 class UserResponseDTO(UserBaseDTO):
     created_at: datetime

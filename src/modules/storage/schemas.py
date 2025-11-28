@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from src.modules.storage.models import PriorityLevel, ConfidentialityLevel
 
@@ -11,6 +11,8 @@ class FileUploadDTO(BaseModel):
 
 
 class FileResponseDTO(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     title: str
     file_path: str
@@ -19,14 +21,28 @@ class FileResponseDTO(BaseModel):
     upload_date: datetime
     first_lines: str
     last_modified: datetime
-    category_name: str
-    source_name: str
-    priority_level: PriorityLevel
-    confidentiality: ConfidentialityLevel
-    tags: List['TagResponse'] = []
 
-    class Config:
-        from_attributes = True
+    # Вложенные объекты
+    category: 'CategoryResponseDTO'
+    source: 'SourceResponseDTO'
+    tags: List['TagResponseDTO'] = []
+
+
+class CategoryResponseDTO(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    category_name: str
+    priority_level: str
+    confidentiality: str
+
+
+class SourceResponseDTO(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    source_name: str
+
+
+class TagResponseDTO(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    tag_name: str
 
 
 class CategoryCreateDTO(BaseModel):

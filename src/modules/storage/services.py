@@ -26,7 +26,7 @@ class StorageService:
         так же она будет не только принимать параметры и теги от пользователя, но и через анализатор
         находить новые
         """
-        # self.__parser_registry.(file_upload)
+        # self.__parser_registry(file_upload)
 
     def get_list_of_user_files(self, user_id: int, file_type: str, tags: list[str], counterparty: str) -> list[
         File]:
@@ -36,3 +36,9 @@ class StorageService:
         """
         files = self.__storage_repository.get_files_by_filters(user_id, file_type, tags, counterparty)
         return files
+
+    def delete_file(self, file_id: int) -> None:
+        self.__storage_repository.delete_file(file_id)
+
+    def get_file_by_id(self, file_id: int):
+        return self.__storage_repository.get_file_by_id(file_id)

@@ -1,6 +1,6 @@
-from typing import List, Optional
+from typing import List, Optional, Type
 
-from sqlalchemy.orm import Session, Query
+from sqlalchemy.orm import Session, Query, joinedload
 
 from src.modules.storage.models import File, Tag, FileTag, Source
 from src.modules.user.models import User
@@ -181,8 +181,12 @@ class StorageRepository:
             file_type: Optional[str] = None,
             tags: Optional[List[str]] = None,
             counterparty: Optional[str] = None
-    ) -> List[File]:
-        query = self.__session.query(File)
+    ) -> list[Type[File]]:
+        query = self.__session.query(File).options(
+            joinedload(File.category),
+            joinedload(File.source),
+            joinedload(File.tags)
+        )
         if user_id:
             query = query.filter(File.user_id == user_id)
         if file_type:
