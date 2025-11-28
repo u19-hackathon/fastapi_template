@@ -8,6 +8,8 @@ from .models import ParsedDocument
 from .txt_parser import TxtParser
 from .docx_parser import DocxParser
 from .pdf_parser import PdfParser
+from .image_parser import ImageParser
+from .rtf_parser import RtfParser  # <-- обязательно импортируем здесь
 
 
 class ParserRegistry:
@@ -21,6 +23,9 @@ class ParserRegistry:
                 TxtParser(),
                 DocxParser(),
                 PdfParser(),
+                ImageParser(),
+                RtfParser(),
+                # Добавляем парсер изображений
             ]
         self._parsers: List[BaseParser] = list(parsers)
 
