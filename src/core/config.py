@@ -34,3 +34,4 @@ if not all([JWT_KEY, JWT_ACCESS_EXPIRATION, JWT_REFRESH_EXPIRATION, JWT_ALGORITH
     raise JWTConfigException("Not enough data for jwt building")
 
 FILE_SAVE_BASE_PATH = os.environ.get("FILE_SAVE_BASE_PATH")
+MAX_FILE_SIZE = int(os.environ.get("MAX_FILE_SIZE"))

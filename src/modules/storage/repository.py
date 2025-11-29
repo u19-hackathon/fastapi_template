@@ -1,12 +1,10 @@
-from typing import List, Optional, Type
+from typing import List, Optional, Type, reveal_type
 
-from dns.e164 import query
-from sqlalchemy.orm import Session, Query, joinedload
+from sqlalchemy import select, func, exists
+from sqlalchemy.orm import Session, joinedload
 
-from src.modules.storage.models import File, Tag, FileTag, Source, Category
-from src.modules.user.models import User
-from sqlalchemy import select, func
-from sqlalchemy import exists
+from src.modules.storage.models import File, Tag, FileTag, Category, PriorityLevel, ConfidentialityLevel, Source, \
+    SourceType
 
 
 class StorageRepository:
@@ -40,6 +38,16 @@ class StorageRepository:
         self.__session.commit()
         self.__session.refresh(db_file)
         return db_file
+
+    def create_category(self, category_name, document_type):
+        db_category = Category(
+            category_name=category_name, document_type=document_type,
+            priority_level=PriorityLevel.normal, confidentiality=ConfidentialityLevel.internal,
+        )
+        self.__session.add(db_category)
+        self.__session.commit()
+        self.__session.refresh(db_category)
+        return db_category
 
     def get_all_files(self) -> List[File]:
         stmt = select(File).order_by(File.last_modified)
@@ -210,3 +218,37 @@ class StorageRepository:
     def get_all_counterparty(self):
         query = self.__session.query(Tag).where(Tag.tag_name == "контрагент")
         return query.all()
+
+    def check_hash_exists(self, file_hash: str) -> bool:
+        exists_hash = self.__session.query(
+            exists().where(File.file_hash == file_hash)
+        ).scalar()
+        return exists_hash
+
+    def get_file_path(self, file_id) -> str:
+        return self.__session.get(File, file_id).file_path
+
+    def check_category_exists(self, category_name):
+        return self.__session.query(
+            exists().where(Category.category_name == category_name)
+        ).scalar()
+
+    def get_category_id_by_name(self, category_name: str) -> Optional[int]:
+        category = self.__session.query(Category).filter(
+            Category.category_name == category_name
+        ).first()
+
+        if category:
+            return category.id
+        return None
+
+    def check_source_id_exists(self, source_id: int) -> bool:
+        return self.__session.query(
+            exists().where(Source.id == source_id)
+        ).scalar()
+
+    def create_source(self, source_name: str, source_type: SourceType):
+        db_source = Source(source_name=source_name, source_type=source_type)
+        self.__session.add(db_source)
+        self.__session.commit()
+        self.__session.refresh(db_source)

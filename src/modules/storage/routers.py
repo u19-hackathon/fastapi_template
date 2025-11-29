@@ -1,13 +1,12 @@
 from typing import Optional
 
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from fastapi.params import Depends
 from fastapi import Query
+from fastapi.params import Depends
 
 from src.core.dependencies import get_jwt_service, get_storage_service, \
     get_authentication_header
 from src.modules.jwt.services import JWTService
-from src.modules.storage.models import Tag, Category
 from src.modules.storage.schemas import FileResponseDTO, TagResponseDTO, CategoryResponseDTO
 from src.modules.storage.services import StorageService
 
@@ -83,7 +82,7 @@ async def delete_file(
         raise HTTPException(status_code=404, detail="Not found")
     if file.user_id != user_id:
         raise HTTPException(status_code=403, detail="Forbidden")
-    storage_service.delete_file(file_id)
+    storage_service.delete_file(file_id, storage_service.get_file_path(file_id))
     return None
 
 

@@ -18,9 +18,9 @@ class FileResponseDTO(BaseModel):
     file_path: str
     file_type: str
     file_hash: Optional[str] = None
-    upload_date: datetime
-    first_lines: str
-    last_modified: datetime
+    upload_date: Optional[datetime]
+    first_lines: Optional[str]
+    last_modified: Optional[datetime]
 
     # Вложенные объекты
     category: 'CategoryResponseDTO'

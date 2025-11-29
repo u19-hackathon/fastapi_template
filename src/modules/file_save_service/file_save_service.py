@@ -35,7 +35,7 @@ class FileSaveService:
         return str(file_path)
 
     @staticmethod
-    def delete_file(self, file_path: str) -> bool:
+    def delete_file(file_path: str) -> bool:
         """Удаляет файл по полному пути"""
         try:
             path = Path(file_path)
@@ -45,4 +45,3 @@ class FileSaveService:
             return False
         except OSError:
             return False
-

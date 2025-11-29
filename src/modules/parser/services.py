@@ -1,22 +1,24 @@
 from __future__ import annotations
 
+import tempfile
 from pathlib import Path
 from typing import List, Sequence
 
+from fastapi import UploadFile
+
 from .base import BaseParser
-from .models import ParsedDocument
-from .txt_parser import TxtParser
 from .docx_parser import DocxParser
+from .models import ParsedDocument
 from .pdf_parser import PdfParser
 # from .image_parser import ImageParser
-from .rtf_parser import RtfParser  # <-- обязательно импортируем здесь
+from .rtf_parser import RtfParser
+from .txt_parser import TxtParser
+
+
+# from .image_parser import ImageParser
 
 
 class ParserRegistry:
-    """
-    Реестр парсеров. Хранит список всех парсеров и выбирает подходящий под файл.
-    """
-
     def __init__(self, parsers: Sequence[BaseParser] | None = None) -> None:
         if parsers is None:
             parsers = [
@@ -25,38 +27,67 @@ class ParserRegistry:
                 PdfParser(),
                 # ImageParser(),
                 RtfParser(),
-                # Добавляем парсер изображений
             ]
         self._parsers: List[BaseParser] = list(parsers)
 
     def register(self, parser: BaseParser) -> None:
-        """
-        Позволяет динамически добавлять новые парсеры.
-        """
         self._parsers.append(parser)
 
     def parse(self, path: Path) -> ParsedDocument:
-        """
-        Подбирает и вызывает нужный парсер.
-        """
         for parser in self._parsers:
             if parser.supports(path):
                 return parser.parse(path)
-
         raise ValueError(f"Нет подходящего парсера для файла: {path}")
 
 
-# Singleton-экземпляр реестра, используется в parse_file()
 _registry = ParserRegistry()
 
 
+# -------------------- parse_file --------------------
+
 def parse_file(path: str | Path) -> ParsedDocument:
-    """
-    Главная точка входа: принимает путь к файлу и возвращает ParsedDocument.
-    Этот метод будет использоваться модулем анализа.
-    """
     p = Path(path)
     if not p.exists():
         raise FileNotFoundError(p)
-
     return _registry.parse(p)
+
+
+# -------------------- parse_upload_file --------------------
+
+async def _copy_upload_to_temp(upload: UploadFile) -> Path:
+    suffix = Path(upload.filename).suffix if upload.filename else ""
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+        while True:
+            chunk = await upload.read(1024 * 1024)
+            if not chunk:
+                break
+            tmp.write(chunk)
+        temp_path = Path(tmp.name)
+    await upload.seek(0)
+    return temp_path
+
+
+async def parse_upload_file(upload: UploadFile) -> ParsedDocument:
+    tmp_path = await _copy_upload_to_temp(upload)
+
+    try:
+        doc = _registry.parse(tmp_path)
+
+        if upload.filename:
+            doc.metadata.setdefault("original_filename", upload.filename)
+
+        content_type = getattr(upload, "content_type", None)
+        if content_type:
+            doc.metadata.setdefault("upload_content_type", content_type)
+
+        size = getattr(upload, "size", None)
+        if size is not None:
+            doc.metadata.setdefault("upload_size_bytes", str(size))
+
+        return doc
+
+    finally:
+        try:
+            tmp_path.unlink(missing_ok=True)
+        except Exception:
+            pass

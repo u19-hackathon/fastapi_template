@@ -64,7 +64,7 @@ class Source(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     source_name = Column(String(255), unique=True, nullable=False)
-    source_type = Column(Enum(SourceType), nullable=False)
+    source_type = Column(Enum(SourceType), nullable=True)
 
     files = relationship("File", back_populates="source")
 

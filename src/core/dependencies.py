@@ -12,6 +12,7 @@ from src.core.security import PasswordManager
 from sqlalchemy.orm import Session
 from src.core.database import session_maker
 from src.modules.parser import ParserRegistry
+from src.modules.parser.services import parse_upload_file
 from src.modules.storage.repository import StorageRepository
 from src.modules.storage.services import StorageService
 
@@ -65,7 +66,7 @@ def get_analyzer():
 
 
 def get_parser_registry():
-    return ParserRegistry()
+    return parse_upload_file
 
 
 def get_hasher():
@@ -75,7 +76,7 @@ def get_hasher():
 def get_storage_service(
         storage_repository: StorageRepository = Depends(get_storage_repository),
         file_save_service: FileSaveService = Depends(get_file_save_service),
-        parser_registry: ParserRegistry = Depends(get_parser_registry),
+        parser_registry: callable = Depends(get_parser_registry),
         file_analyzer: callable = Depends(get_analyzer),
         hasher: callable = Depends(get_hasher)
 ) -> StorageService:
