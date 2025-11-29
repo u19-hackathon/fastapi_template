@@ -5,20 +5,22 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('../views/LoginView.vue'),
-    meta: { requiresAuth: false }
+    component: () => import('../views/LoginView.vue')
   },
   {
     path: '/register',
     name: 'Register',
-    component: () => import('../views/RegisterView.vue'),
-    meta: { requiresAuth: false }
+    component: () => import('../views/RegisterView.vue')
   },
   {
     path: '/',
     name: 'Home',
-    component: () => import('../views/MainView.vue'),
-    meta: { requiresAuth: true }
+    component: () => import('../views/MainView.vue')
+  },
+  {
+    path: '/analytics',
+    name: 'Analytics',
+    component: () => import('../views/AnalyticsView.vue')
   }
 ]
 

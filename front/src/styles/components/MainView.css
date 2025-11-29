@@ -1,6 +1,5 @@
 @import '../variables.css';
 
-
 .main-view {
   display: flex;
   min-height: 100vh;
@@ -72,8 +71,8 @@
 
 .header-actions {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 20px;
 }
 
 .search-box {
@@ -94,32 +93,103 @@
   border-color: #3498db;
 }
 
-.user-menu {
+/* Компактный блок пользователя */
+.user-info.compact {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
+  padding: 8px 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  margin-left: auto;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  background: #2c5aa0;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.user-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .user-name {
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 14px;
   color: #2c3e50;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-badge {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.user-org {
+  font-size: 12px;
+  color: #6c757d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .logout-btn {
-  padding: 8px 16px;
+  padding: 6px 12px;
+  font-size: 12px;
+  white-space: nowrap;
   background: #e74c3c;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
 }
 
 .logout-btn:hover {
   background: #c0392b;
 }
 
-/* Фильтры */
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #2c5aa0;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Остальные стили остаются без изменений */
 .filters-section {
   background: white;
   padding: 20px 30px;
@@ -150,7 +220,6 @@
   background: white;
 }
 
-/* Основной контент с документами */
 .main-content {
   flex: 1;
   display: grid;
@@ -170,7 +239,6 @@
   font-size: 20px;
 }
 
-/* Заголовки документов */
 .documents-header {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr;
@@ -184,7 +252,6 @@
   font-size: 14px;
 }
 
-/* Список документов */
 .documents-list {
   border: 1px solid #e1e5e9;
   border-radius: 6px;
@@ -248,7 +315,6 @@
   color: #555;
 }
 
-/* Панель предпросмотра */
 .preview-section {
   background: white;
   border-left: 1px solid #e1e5e9;
@@ -319,7 +385,6 @@
   font-size: 11px;
 }
 
-/* Модальное окно загрузки */
 .upload-modal-overlay {
   position: fixed;
   top: 0;
@@ -379,7 +444,6 @@
   color: var(--text-dark);
 }
 
-/* Область перетаскивания */
 .upload-area {
   border: 2px dashed #ddd;
   border-radius: 8px;
@@ -433,7 +497,6 @@
   color: white;
 }
 
-/* Список загрузки */
 .upload-list {
   margin: 0 24px 24px;
 }
@@ -521,7 +584,6 @@
   background: #f8d7da;
 }
 
-/* Прогресс бар */
 .progress-bar {
   width: 120px;
   height: 6px;
@@ -537,35 +599,45 @@
   transition: width 0.3s ease;
 }
 
-/* Адаптивность для мобильных */
 @media (max-width: 768px) {
   .upload-modal-overlay {
     padding: 10px;
   }
-  
+
   .upload-modal {
     max-height: 95vh;
   }
-  
+
   .upload-area {
     padding: 40px 20px;
     margin: 16px;
   }
-  
+
   .upload-modal-header,
   .upload-list {
     margin-left: 16px;
     margin-right: 16px;
   }
-  
+
   .upload-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
-  
+
   .file-actions {
     width: 100%;
     justify-content: flex-end;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .user-info.compact {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
   }
 }

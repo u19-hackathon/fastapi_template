@@ -286,7 +286,6 @@ class ApiService {
         }
 
         try {
-            // 🔍 ПОЛУЧАЕМ USER_ID ИЗ JWT ТОКЕНА
             const userId = this.getUserIdFromToken();
 
             if (!userId) {

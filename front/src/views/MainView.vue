@@ -6,22 +6,14 @@
         <h1>DocHub</h1>
       </div>
       <nav class="sidebar-nav">
-        <a href="#" class="nav-item active">
-          <span class="nav-icon">📊</span>
-          Dashboard
-        </a>
-        <a href="#" class="nav-item">
+        <router-link to="/" class="nav-item" :class="{ active: $route.name === 'Home' }">
           <span class="nav-icon">📄</span>
-          Documents
-        </a>
-        <a href="#" class="nav-item">
+          Документы
+        </router-link>
+        <router-link to="/analytics" class="nav-item" :class="{ active: $route.name === 'Analytics' }">
           <span class="nav-icon">📈</span>
-          Analytics
-        </a>
-        <a href="#" class="nav-item">
-          <span class="nav-icon">⚙️</span>
-          Settings
-        </a>
+          Аналитика
+        </router-link>
       </nav>
     </aside>
 
@@ -31,20 +23,42 @@
       <header class="content-header">
         <div class="header-actions">
           <div class="search-box">
-            <input 
-              type="text" 
-              placeholder="Search documents..." 
+            <input
+              type="text"
+              placeholder="Поиск документов..."
               class="search-input"
             >
           </div>
           <button @click="showUploadModal = true" class="btn btn-primary upload-btn">
-              📎 Загрузить документ
-            </button>
-          <div class="header-buttons">
-            <div class="user-menu">
-              <span class="user-name">Иван Иванов</span>
-              <button @click="handleLogout" class="logout-btn">Выйти</button>
+            📎 Загрузить документ
+          </button>
+
+          <div v-if="loading" class="user-info compact">
+            <div class="loading-spinner"></div>
+            <span>Загрузка...</span>
+          </div>
+
+          <div v-else-if="user" class="user-info compact">
+            <div class="user-avatar">
+              {{ getInitials(user.full_name) }}
             </div>
+            <div class="user-details">
+              <div class="user-main">
+                <span class="user-name">{{ user.full_name }}</span>
+                <span class="user-badge">{{ user.position }}</span>
+              </div>
+              <div class="user-org">{{ user.organization_name }}</div>
+            </div>
+            <button @click="handleLogout" class="btn btn-secondary logout-btn">
+              Выйти
+            </button>
+          </div>
+
+          <div v-else class="user-info compact">
+            <span>❌ Ошибка</span>
+            <button @click="handleLogout" class="btn btn-secondary logout-btn">
+              🚪
+            </button>
           </div>
         </div>
       </header>
@@ -53,27 +67,27 @@
       <div class="filters-section">
         <div class="filters-grid">
           <div class="filter-group">
-            <label>Type</label>
+            <label>Тип</label>
             <select class="filter-select">
-              <option>Any</option>
+              <option>Любой</option>
               <option>Договор</option>
               <option>Счёт</option>
               <option>Акт</option>
             </select>
           </div>
           <div class="filter-group">
-            <label>Tag</label>
+            <label>Тег</label>
             <select class="filter-select">
-              <option>Any</option>
+              <option>Любой</option>
               <option>Юридический</option>
               <option>Кадровый</option>
               <option>Финансовый</option>
             </select>
           </div>
           <div class="filter-group">
-            <label>Counterparty</label>
+            <label>Компания</label>
             <select class="filter-select">
-              <option>All</option>
+              <option>Все</option>
               <option>ООО "Ромашка"</option>
               <option>ООО "Вектор"</option>
             </select>
@@ -85,21 +99,21 @@
       <div class="main-content">
         <div class="documents-section">
           <div class="section-header">
-            <h2>Documents</h2>
+            <h2>Документы</h2>
           </div>
-          
+
           <!-- Заголовки таблицы -->
           <div class="documents-header">
-            <div class="doc-header-column">Document</div>
-            <div class="doc-header-column">Type</div>
-            <div class="doc-header-column">Counterparty</div>
-            <div class="doc-header-column">Date</div>
+            <div class="doc-header-column">Документ</div>
+            <div class="doc-header-column">Тип</div>
+            <div class="doc-header-column">Компания</div>
+            <div class="doc-header-column">Дата</div>
           </div>
 
           <!-- Список документов -->
           <div class="documents-list">
-            <div 
-              v-for="document in documents" 
+            <div
+              v-for="document in documents"
               :key="document.id"
               class="document-item"
               :class="{ active: selectedDocument?.id === document.id }"
@@ -113,7 +127,7 @@
                 </div>
               </div>
               <div class="doc-column doc-type">{{ document.type }}</div>
-              <div class="doc-column doc-counterparty">{{ document.counterparty }}</div>
+              <div class="doc-column doc-company">{{ document.company }}</div>
               <div class="doc-column doc-date">{{ document.date }}</div>
             </div>
           </div>
@@ -125,30 +139,30 @@
             <h3>PDF</h3>
             <div class="document-title">{{ selectedDocument.filename }}</div>
           </div>
-          
+
           <div class="document-details">
             <div class="detail-item">
               <label>ID</label>
               <span>{{ selectedDocument.id }}</span>
             </div>
             <div class="detail-item">
-              <label>Type</label>
+              <label>Тип</label>
               <span>{{ selectedDocument.type }}</span>
             </div>
             <div class="detail-item">
-              <label>Counterparty</label>
-              <span>{{ selectedDocument.counterparty }}</span>
+              <label>Компания</label>
+              <span>{{ selectedDocument.company }}</span>
             </div>
             <div class="detail-item">
-              <label>Date</label>
+              <label>Дата</label>
               <span>{{ selectedDocument.date }}</span>
             </div>
             <div class="detail-item">
-              <label>Status</label>
+              <label>Статус</label>
               <span class="status-badge">{{ selectedDocument.status }}</span>
             </div>
             <div class="detail-item tags">
-              <label>Tags</label>
+              <label>Теги</label>
               <div class="tags-list">
                 <span 
                   v-for="tag in selectedDocument.tags" 
@@ -238,10 +252,10 @@ export default {
     return {
       user: null,
       loading: true,
-      selectedDocument: null,
       showUploadModal: false,
       dragOver: false,
       uploadQueue: [],
+      selectedDocument: null,
       documents: [
         {
           id: '264917',
@@ -267,133 +281,41 @@ export default {
     }
   },
   methods: {
-    // 🔐 РЕАЛЬНЫЙ ВЫХОД
-    async handleLogout() {
-      console.log('🚪 Выход из системы...');
-      apiService.clearTokens();
-      this.$router.push('/login');
-    },
-
-    // 👤 ЗАГРУЗКА ДАННЫХ ПОЛЬЗОВАТЕЛЯ
+    // 🔐 Загрузка данных пользователя
     async loadUserData() {
       try {
-        console.log('👤 Загружаем данные пользователя...');
         this.user = await apiService.getCurrentUser();
-
-        if (this.user) {
-          console.log('✅ Данные пользователя:', this.user);
-        } else {
-          console.log('❌ Не удалось загрузить пользователя');
-          this.handleLogout();
-        }
+        if (!this.user) this.handleLogout();
       } catch (error) {
-        console.error('💥 Ошибка загрузки пользователя:', error);
         this.handleLogout();
       } finally {
         this.loading = false;
       }
     },
 
-    // 📤 РЕАЛЬНАЯ ЗАГРУЗКА ФАЙЛОВ (ЗАГЛУШКА ДЛЯ БУДУЩЕГО)
-    async uploadFileToServer(fileItem) {
-      console.log('📤 Начинаем загрузку файла:', fileItem.name);
-
-      // 🎯 ЗДЕСЬ БУДЕТ РЕАЛЬНЫЙ API ЗАПРОС КОГДА ПОЯВИТСЯ БЭКЕНД
-      try {
-        // Пример будущего кода:
-        // const formData = new FormData();
-        // formData.append('file', fileItem.file);
-        // formData.append('user_id', this.user.id);
-        //
-        // const response = await apiService.request('/documents/upload', {
-        //   method: 'POST',
-        //   body: formData,
-        //   headers: {
-        //     'Authorization': `Bearer ${apiService.accessToken}`
-        //   }
-        // });
-
-        // Пока просто имитируем успешную загрузку
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        console.log('✅ Файл успешно загружен:', fileItem.name);
-        return { success: true, documentId: 'temp_' + Date.now() };
-
-      } catch (error) {
-        console.error('💥 Ошибка загрузки файла:', error);
-        return { success: false, error: error.message };
-      }
+    // 🚪 Выход из системы
+    handleLogout() {
+      console.log('🚪 Выход из системы...');
+      apiService.clearTokens();
+      this.$router.push('/login');
     },
 
-    // 🔄 ОБНОВЛЕННАЯ ЗАГРУЗКА С РЕАЛЬНОЙ ЛОГИКОЙ
-    async processUploadQueue() {
-      const waitingFiles = this.uploadQueue.filter(f => f.status === 'waiting');
-
-      for (const fileItem of waitingFiles) {
-        fileItem.status = 'uploading';
-
-        // 📤 РЕАЛЬНАЯ ЗАГРУЗКА НА СЕРВЕР
-        const uploadResult = await this.uploadFileToServer(fileItem);
-
-        if (uploadResult.success) {
-          fileItem.status = 'processing';
-          fileItem.documentId = uploadResult.documentId;
-
-          // 🧠 ИМИТАЦИЯ КЛАССИФИКАЦИИ (ПОКА)
-          await this.simulateDocumentProcessing(fileItem);
-
-          fileItem.status = 'completed';
-          fileItem.progress = 100;
-
-          // 📝 ДОБАВЛЯЕМ В СПИСОК ДОКУМЕНТОВ
-          this.addToDocumentsList(fileItem);
-        } else {
-          fileItem.status = 'error';
-          fileItem.error = uploadResult.error;
-        }
-      }
+    // 👤 Получение инициалов для аватара
+    getInitials(fullName) {
+      if (!fullName) return '??';
+      return fullName
+          .split(' ')
+          .map(name => name[0])
+          .join('')
+          .toUpperCase();
     },
 
-    // 📝 ДОБАВЛЕНИЕ ЗАГРУЖЕННОГО ФАЙЛА В СПИСОК
-    addToDocumentsList(fileItem) {
-      const newDocument = {
-        id: fileItem.documentId,
-        title: this.extractTitle(fileItem.name),
-        filename: fileItem.name,
-        type: 'Новый документ', // 🎯 БУДЕТ ОПРЕДЕЛЯТЬСЯ ПРИ КЛАССИФИКАЦИИ
-        counterparty: 'Не указан',
-        date: new Date().toLocaleDateString('ru-RU'),
-        status: 'Обработан',
-        tags: ['Новый']
-      };
-
-      this.documents.unshift(newDocument); // Добавляем в начало
-
-      // 🎯 ЕСЛИ НЕТ ВЫБРАННОГО ДОКУМЕНТА - ВЫБИРАЕМ ПЕРВЫЙ
-      if (!this.selectedDocument) {
-        this.selectedDocument = newDocument;
-      }
-    },
-
-    // 🧠 ИЗВЛЕЧЕНИЕ НАЗВАНИЯ ИЗ ИМЕНИ ФАЙЛА
-    extractTitle(filename) {
-      // Убираем расширение файла
-      return filename.replace(/\.[^/.]+$/, "");
-    },
-
-    // 🧪 СИМУЛЯЦИЯ ОБРАБОТКИ (ПОКА)
-    simulateDocumentProcessing(fileItem) {
-      return new Promise((resolve) => {
-        console.log('🧠 Классифицируем документ:', fileItem.name);
-        setTimeout(resolve, 1500);
-      });
-    },
-
-    // 🎯 СУЩЕСТВУЮЩИЕ МЕТОДЫ (ОСТАВЛЯЕМ)
+    // 📄 Методы для работы с документами
     selectDocument(document) {
       this.selectedDocument = document;
     },
 
+    // 📎 Загрузка файлов
     triggerFileInput() {
       this.$refs.fileInput?.click();
     },
@@ -423,7 +345,57 @@ export default {
         this.uploadQueue.push(fileItem);
       });
 
+      // Автоматически начинаем загрузку
       this.processUploadQueue();
+    },
+
+    async processUploadQueue() {
+      const waitingFiles = this.uploadQueue.filter(f => f.status === 'waiting');
+
+      for (const fileItem of waitingFiles) {
+        fileItem.status = 'uploading';
+
+        // Имитация загрузки (заглушка)
+        await this.simulateUpload(fileItem);
+
+        // После загрузки - классификация
+        fileItem.status = 'processing';
+        await this.simulateProcessing(fileItem);
+
+        // Завершено
+        fileItem.status = 'completed';
+        fileItem.progress = 100;
+      }
+    },
+
+    simulateUpload(fileItem) {
+      return new Promise((resolve) => {
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += 10;
+          fileItem.progress = progress;
+
+          if (progress >= 100) {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 200);
+      });
+    },
+
+    simulateProcessing(fileItem) {
+      return new Promise((resolve) => {
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += 15;
+          fileItem.progress = progress;
+
+          if (progress >= 100) {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 300);
+      });
     },
 
     removeFromQueue(fileId) {
@@ -431,19 +403,49 @@ export default {
     }
   },
 
-  // 🎯 MOUNTED ТЕПЕРЬ ИСПОЛЬЗУЕТСЯ!
+  // 🎯 Хуки жизненного цикла
   async mounted() {
     console.log('🔄 MainView mounted - загружаем данные...');
-
-    // 1. 🔐 ЗАГРУЖАЕМ ДАННЫЕ ПОЛЬЗОВАТЕЛЯ
     await this.loadUserData();
 
-    // 2. 📄 ВЫБИРАЕМ ПЕРВЫЙ ДОКУМЕНТ ЕСЛИ ЕСТЬ
+    // Выбираем первый документ по умолчанию
     if (this.documents.length > 0 && !this.selectedDocument) {
       this.selectedDocument = this.documents[0];
     }
 
     console.log('✅ MainView готов к работе!');
+  },
+
+  // 👂 Обработчики событий drag & drop
+  created() {
+    // Сохраняем ссылки на функции
+    this.handleDragOver = (e) => {
+      e.preventDefault();
+      this.dragOver = true;
+    };
+
+    this.handleDragLeave = (e) => {
+      e.preventDefault();
+      this.dragOver = false;
+    };
+
+    this.handleDrop = (e) => {
+      e.preventDefault();
+      this.dragOver = false;
+      this.handleFileDrop(e);
+    };
+
+    // Добавляем обработчики
+    document.addEventListener('dragover', this.handleDragOver);
+    document.addEventListener('dragleave', this.handleDragLeave);
+    document.addEventListener('drop', this.handleDrop);
+  },
+
+  beforeDestroy() {
+    // Убираем обработчики
+    document.removeEventListener('dragover', this.handleDragOver);
+    document.removeEventListener('dragleave', this.handleDragLeave);
+    document.removeEventListener('drop', this.handleDrop);
   }
 }
 </script>
