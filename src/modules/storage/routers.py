@@ -39,6 +39,7 @@ async def get_files(
 
 @storage_router.post("/upload")
 async def upload_file(
+        tags: list[str] = Query(None, description="Список тегов"),
         jwt_service: JWTService = Depends(get_jwt_service),
         user_jwt: str = Depends(get_authentication_header),
         files: list[UploadFile] = File(...),
@@ -54,8 +55,7 @@ async def upload_file(
     user_id = payload.get("sub")
     if not user_id:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    files_answer = storage_service.create_files(user_id, files)
-    # files_answer_dto = [FileResponseDTO.model_validate(file) for file in files_answer]
+    await storage_service.create_files(user_id, files, tags)
     return None
 
 

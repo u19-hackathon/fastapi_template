@@ -1,12 +1,13 @@
-from typing import Type
+import asyncio
+from typing import Type, Optional
 
 from fastapi import UploadFile
 
 from src.core.config import MAX_FILE_SIZE
-from src.modules.analysis import FileMetadata
+from src.modules.analysis import FileMetadata, AnalysisResult, TagResult, TagSource
 from src.modules.file_save_service.file_save_service import FileSaveService
 from src.modules.parser import ParsedDocument
-from src.modules.storage.models import File, PriorityLevel, ConfidentialityLevel, SourceType
+from src.modules.storage.models import File, PriorityLevel, ConfidentialityLevel, SourceType, Tag
 from src.modules.storage.repository import StorageRepository
 
 
@@ -24,16 +25,16 @@ class StorageService:
         self.__file_analyzer = file_analyzer
         self.__hasher = hasher
 
-    def create_files(self, user_id: int, files_upload: list[UploadFile]):
+    async def create_files(self, user_id: int, files_upload: list[UploadFile], tags: list[str]):
         """
         Функция для создания нового файла. Идея в том, что именно она будет отсеивать дубликаты,
         так же она будет не только принимать параметры и теги от пользователя, но и через анализатор
         находить новые
         """
         for file in files_upload:
-            self.create_file(user_id, file)
+            await self.create_file(user_id, file, tags)
 
-    def create_file(self, user_id, file_upload: UploadFile):
+    async def create_file(self, user_id, file_upload: UploadFile, tags: list[str]):
         if file_upload.size > MAX_FILE_SIZE:
             return
 
@@ -54,21 +55,40 @@ class StorageService:
                                                      file_upload.content_type, file_hash, user_id,
                                                      self.get_category_id_by_name(file_upload.content_type), 1, None)
 
-        parsed_document: ParsedDocument = self.__parser_registry(file_upload)
-        analyze_result = self.__file_analyzer(FileMetadata(
+        parsed_document: ParsedDocument = await self.__parser_registry(file_upload)
+        analyze_result: AnalysisResult = self.__file_analyzer(FileMetadata(
             file_id=file.id,
             title=file.title,
             category_document_type=file.file_type,
             priority_level=PriorityLevel.normal,
             confidentiality=ConfidentialityLevel.internal
-        ), parsed_document)
-        print("Result!!!" + str(analyze_result))
+        ), parsed_document.raw_text, tags)
+        self.__add_all_tags_to_file(file.id, analyze_result.tags, user_id)
+
+    def __add_all_tags_to_file(self, file_id: int, tags: list[TagResult], user_id: int):
+        for tag in tags:
+            if not self.__check_tag_exists(tag.name):
+                self.create_tag(tag, tag.source.value, "")
+            tag_model: Tag = self.__get_tag_id_by_name(tag.name)
+            self.add_tag_to_file(file_id, tag_model.id, user_id)
 
     def __check_hash_exists(self, file_hash: str):
         return self.__storage_repository.check_hash_exists(file_hash)
 
+    def __get_tag_id_by_name(self, tag_name: str):
+        return self.__storage_repository.get_tag_by_name(tag_name)
+
+    def add_tag_to_file(self, file_id: int, tag_id: int, assigned_by: Optional[int]):
+        self.__storage_repository.add_tag_to_file(file_id, tag_id, assigned_by=assigned_by)
+
     def __check_source_id_exists(self, source_id: int):
         return self.__storage_repository.check_source_id_exists(source_id)
+
+    def __check_tag_exists(self, tag_name: str):
+        return self.__storage_repository.check_tag_exists(tag_name)
+
+    def create_tag(self, tag_name, tag_type: str, description: str):
+        return self.__storage_repository.create_tag(tag_name, tag_type, description)
 
     def __check_category_exists(self, file_category: str):
         return self.__storage_repository.check_category_exists(file_category)

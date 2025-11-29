@@ -252,3 +252,12 @@ class StorageRepository:
         self.__session.add(db_source)
         self.__session.commit()
         self.__session.refresh(db_source)
+
+    def check_tag_exists(self, tag_name: str):
+        return self.__session.query(exists().where(Tag.tag_name == tag_name)).scalar()
+
+    def get_tag_by_name(self, tag_name):
+        tag = self.__session.query(Tag).filter(Tag.tag_name == tag_name).first()
+        if tag:
+            return tag
+        return None
