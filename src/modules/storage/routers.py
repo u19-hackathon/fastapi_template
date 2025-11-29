@@ -1,8 +1,11 @@
+import os
+from sys import prefix
 from typing import Optional
 
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi import Query
 from fastapi.params import Depends
+from starlette.responses import FileResponse
 
 from src.core.dependencies import get_jwt_service, get_storage_service, \
     get_authentication_header
@@ -117,3 +120,36 @@ async def get_all_counterparty(
 ) -> list[TagResponseDTO]:
     counterparties = storage_service.get_all_counterparty()
     return [TagResponseDTO.model_validate(tag) for tag in counterparties]
+
+
+save_file_controller = APIRouter(prefix="/api/file-save")
+
+
+@save_file_controller.get("/{file_id}")
+async def get_file(
+        file_id: int,
+        jwt_service: JWTService = Depends(get_jwt_service),
+        user_jwt: str = Depends(get_authentication_header),
+        storage_service: StorageService = Depends(get_storage_service)
+) -> FileResponse:
+    payload = jwt_service.decode_token(token=user_jwt)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    if not payload.get("type"):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    if payload.get("type") != "access":
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    file = storage_service.get_file_by_id(file_id)
+    if not file:
+
+    if file.user_id != int(user_id):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    if not os.path.exists(file.file_path):
+        raise HTTPException(status_code=404, detail="File not found on disk")
+    return FileResponse(
+        path=file.file_path,
+        media_type='application/octet-stream'
+    )

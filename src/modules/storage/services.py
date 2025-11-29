@@ -63,14 +63,17 @@ class StorageService:
             priority_level=PriorityLevel.normal,
             confidentiality=ConfidentialityLevel.internal
         ), parsed_document.raw_text, tags)
+        print(analyze_result)
         self.__add_all_tags_to_file(file.id, analyze_result.tags, user_id)
 
     def __add_all_tags_to_file(self, file_id: int, tags: list[TagResult], user_id: int):
+        print(tags)
         for tag in tags:
             if not self.__check_tag_exists(tag.name):
                 self.create_tag(tag, tag.source.value, "")
             tag_model: Tag = self.__get_tag_id_by_name(tag.name)
-            self.add_tag_to_file(file_id, tag_model.id, user_id)
+            if tag_model:
+                self.add_tag_to_file(file_id, tag_model.id, user_id)
 
     def __check_hash_exists(self, file_hash: str):
         return self.__storage_repository.check_hash_exists(file_hash)

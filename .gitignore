@@ -236,3 +236,4 @@ target/
 Thumbs.db
 
 node_modules/
+file_storage/

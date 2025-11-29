@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-from src.modules.storage.routers import storage_router, tag_controller, counterparty_controller
+from src.modules.storage.routers import storage_router, tag_controller, counterparty_controller, save_file_controller
 from src.modules.user.routers import user_router
 
 app = FastAPI()
@@ -10,6 +10,8 @@ app.include_router(storage_router)
 app.include_router(tag_controller)
 
 app.include_router(counterparty_controller)
+
+app.include_router(save_file_controller)
 
 app.add_middleware(
     CORSMiddleware,
