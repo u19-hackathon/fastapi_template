@@ -144,7 +144,7 @@ async def get_file(
         raise HTTPException(status_code=401, detail="Unauthorized")
     file = storage_service.get_file_by_id(file_id)
     if not file:
-
+        raise HTTPException(status_code=404, detail="File not found on disk")
     if file.user_id != int(user_id):
         raise HTTPException(status_code=403, detail="Forbidden")
     if not os.path.exists(file.file_path):
