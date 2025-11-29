@@ -121,7 +121,7 @@ class FilterService {
    */
   async getUniqueCompaniesFromAPI() {
     try {
-      const response = await apiService.request('/documents/counterparties');
+      const response = await apiService.request('/storage/counterparties');
       return response.counterparties || [];
     } catch (error) {
       console.error('Ошибка получения контрагентов:', error);
@@ -176,7 +176,7 @@ class FilterService {
         }
       });
 
-      const endpoint = `/documents?${queryParams.toString()}`;
+      const endpoint = `/storage?${queryParams.toString()}`;
       const response = await apiService.request(endpoint);
 
       return response.documents || [];

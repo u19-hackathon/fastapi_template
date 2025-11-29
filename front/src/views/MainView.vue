@@ -79,41 +79,12 @@
             </select>
           </div>
           <div class="filter-group">
-            <label class="filter-label">Статус</label>
-            <select class="filter-select" v-model="filters.status">
-              <option value="">Все статусы</option>
-              <option value="processed">Обработан</option>
-              <option value="pending">В обработке</option>
-              <option value="error">Ошибка</option>
-            </select>
-          </div>
-          <div class="filter-group">
             <label class="filter-label">Контрагент</label>
             <select class="filter-select" v-model="filters.counterparty">
               <option value="">Все контрагенты</option>
               <option v-for="company in uniqueCompanies" :key="company" :value="company">
                 {{ company }}
               </option>
-            </select>
-          </div>
-
-          <div class="filter-group">
-            <label class="filter-label">Владелец</label>
-            <select class="filter-select" v-model="filters.owner">
-              <option value="">Все владельцы</option>
-              <option v-for="owner in uniqueOwners" :key="owner.id" :value="owner.id">
-                {{ owner.name }}
-              </option>
-            </select>
-          </div>
-
-          <div class="filter-group">
-            <label class="filter-label">Дата</label>
-            <select class="filter-select" v-model="filters.date">
-              <option value="">За всё время</option>
-              <option value="today">Сегодня</option>
-              <option value="week">За неделю</option>
-              <option value="month">За месяц</option>
             </select>
           </div>
         </div>
@@ -166,8 +137,6 @@
             <div class="doc-header-column">Документ</div>
             <div class="doc-header-column">Тип</div>
             <div class="doc-header-column">Контрагент</div>
-            <div class="doc-header-column">Дата</div>
-            <div class="doc-header-column">Статус</div>
           </div>
 
           <!-- Список документов -->
@@ -218,16 +187,6 @@
                 <div class="doc-column doc-counterparty">
                   {{ document.counterparty }}
                 </div>
-
-                <div class="doc-column doc-date">
-                  {{ document.date }}
-                </div>
-
-                <div class="doc-column doc-status">
-                  <span class="status-badge" :class="document.status">
-                    {{ document.status }}
-                  </span>
-                </div>
               </div>
             </div>
           </div>
@@ -277,13 +236,6 @@
             <div class="detail-item">
               <label>Дата загрузки</label>
               <span>{{ selectedDocument.date }}</span>
-            </div>
-
-            <div class="detail-item">
-              <label>Статус</label>
-              <span class="status-badge" :class="selectedDocument.status">
-                {{ selectedDocument.status }}
-              </span>
             </div>
 
             <div class="detail-item" v-if="selectedDocument.size">
@@ -857,7 +809,6 @@ export default {
   await Promise.all([
     this.loadDocuments(),
     this.loadAllTags(),
-    this.loadUniqueOwners()
   ]);
 
   if (this.documents.length > 0 && !this.selectedDocument) {
