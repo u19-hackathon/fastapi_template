@@ -40,7 +40,7 @@ class StorageService:
 
         file_hash = self.__hasher(file_upload)
 
-        if self.__storage_repository.check_hash_exists(file_hash):
+        if self.__check_hash_exists_for_user(file_hash, user_id):
             return
 
         # пробую сохранять на диске и в бд
@@ -55,28 +55,28 @@ class StorageService:
                                                      file_upload.content_type, file_hash, user_id,
                                                      self.get_category_id_by_name(file_upload.content_type), 1, None)
 
-        parsed_document: ParsedDocument = await self.__parser_registry(file_upload)
-        analyze_result: AnalysisResult = self.__file_analyzer(FileMetadata(
-            file_id=file.id,
-            title=file.title,
-            category_document_type=file.file_type,
-            priority_level=PriorityLevel.normal,
-            confidentiality=ConfidentialityLevel.internal
-        ), parsed_document.raw_text, tags)
-        print(analyze_result)
-        self.__add_all_tags_to_file(file.id, analyze_result.tags, user_id)
+        # parsed_document: ParsedDocument = await self.__parser_registry(file_upload)
+        # analyze_result: AnalysisResult = self.__file_analyzer(FileMetadata(
+        #     file_id=file.id,
+        #     title=file.title,
+        #     category_document_type=file.file_type,
+        #     priority_level=PriorityLevel.normal,
+        #     confidentiality=ConfidentialityLevel.internal
+        # ), parsed_document.raw_text, tags)
+        # print(analyze_result)
+        self.__add_all_tags_to_file(file.id, tags, user_id)
 
-    def __add_all_tags_to_file(self, file_id: int, tags: list[TagResult], user_id: int):
+    def __add_all_tags_to_file(self, file_id: int, tags: list[str], user_id: int):
         print(tags)
         for tag in tags:
-            if not self.__check_tag_exists(tag.name):
-                self.create_tag(tag, tag.source.value, "")
-            tag_model: Tag = self.__get_tag_id_by_name(tag.name)
+            if not self.__check_tag_exists(tag):
+                self.create_tag(tag, "manual", "")
+            tag_model: Tag = self.__get_tag_id_by_name(tag)
             if tag_model:
                 self.add_tag_to_file(file_id, tag_model.id, user_id)
 
-    def __check_hash_exists(self, file_hash: str):
-        return self.__storage_repository.check_hash_exists(file_hash)
+    def __check_hash_exists_for_user(self, file_hash: str, user_id: int):
+        return self.__storage_repository.check_hash_exists_for_user(file_hash, user_id)
 
     def __get_tag_id_by_name(self, tag_name: str):
         return self.__storage_repository.get_tag_by_name(tag_name)

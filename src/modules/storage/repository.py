@@ -219,9 +219,9 @@ class StorageRepository:
         query = self.__session.query(Tag).where(Tag.tag_name == "контрагент")
         return query.all()
 
-    def check_hash_exists(self, file_hash: str) -> bool:
+    def check_hash_exists_for_user(self, file_hash: str, user_id: int) -> bool:
         exists_hash = self.__session.query(
-            exists().where(File.file_hash == file_hash)
+            exists().where(File.file_hash == file_hash).where(File.user_id == user_id)
         ).scalar()
         return exists_hash
 
