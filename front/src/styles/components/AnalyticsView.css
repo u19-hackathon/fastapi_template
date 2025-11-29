@@ -63,6 +63,7 @@
   flex-direction: column;
 }
 
+/* Стили для хедера аналитики */
 .content-header {
   background: white;
   padding: 20px 30px;
@@ -71,33 +72,104 @@
 
 .header-actions {
   display: flex;
-  justify-content: flex-end;
   align-items: center;
+  gap: 20px;
 }
 
-.user-menu {
+/* Компактный блок пользователя */
+.user-info.compact {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
+  padding: 8px 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  margin-left: auto;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  background: #2c5aa0;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.user-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .user-name {
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 14px;
   color: #2c3e50;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-badge {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.user-org {
+  font-size: 12px;
+  color: #6c757d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .logout-btn {
-  padding: 8px 16px;
+  padding: 6px 12px;
+  font-size: 12px;
+  white-space: nowrap;
   background: #e74c3c;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
 }
 
 .logout-btn:hover {
   background: #c0392b;
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #2c5aa0;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Основной контейнер аналитики */
@@ -379,6 +451,59 @@
   text-align: right;
 }
 
+/* Стили для статусов */
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.status-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+  min-width: 120px;
+}
+
+.status-name {
+  font-size: 14px;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.status-count {
+  font-size: 14px;
+  color: #7f8c8d;
+  font-weight: 600;
+}
+
+.status-bar {
+  flex: 1;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+  min-width: 80px;
+  max-width: 150px;
+}
+
+.status-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  background: linear-gradient(90deg, #e74c3c, #c0392b);
+}
+
+.status-percentage {
+  font-size: 12px;
+  color: #7f8c8d;
+  font-weight: 600;
+  min-width: 35px;
+  text-align: right;
+}
+
 /* Адаптивность */
 @media (max-width: 768px) {
   .analytics-container {
@@ -398,19 +523,36 @@
   }
 
   .distribution-item,
-  .month-item {
+  .month-item,
+  .company-item,
+  .status-item {
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
   }
 
   .distribution-info,
-  .month-info {
+  .month-info,
+  .company-info,
+  .status-info {
     min-width: auto;
   }
 
   .distribution-bar,
-  .month-bar {
+  .month-bar,
+  .company-bar,
+  .status-bar {
     max-width: none;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .user-info.compact {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
   }
 }

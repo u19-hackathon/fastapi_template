@@ -22,14 +22,35 @@
       <!-- Хедер -->
       <header class="content-header">
         <div class="header-actions">
-          <div class="header-buttons">
-            <div class="user-menu">
-              <span class="user-name">Иван Иванов</span>
-              <button @click="handleLogout" class="logout-btn">Выйти</button>
-            </div>
-          </div>
+          <div v-if="loading" class="user-info compact">
+      <div class="loading-spinner"></div>
+      <span>Загрузка...</span>
+    </div>
+
+    <div v-else-if="user" class="user-info compact">
+      <div class="user-avatar">
+        {{ getInitials(user.full_name) }}
+      </div>
+      <div class="user-details">
+        <div class="user-main">
+          <span class="user-name">{{ user.full_name }}</span>
+          <span class="user-badge">{{ user.position }}</span>
         </div>
-      </header>
+        <div class="user-org">{{ user.organization_name }}</div>
+      </div>
+      <button @click="handleLogout" class="btn btn-secondary logout-btn">
+        Выйти
+      </button>
+    </div>
+
+    <div v-else class="user-info compact">
+      <span>❌ Ошибка</span>
+      <button @click="handleLogout" class="btn btn-secondary logout-btn">
+        🚪
+      </button>
+    </div>
+  </div>
+</header>
 
       <!-- Основной контент -->
       <div class="main-content">
@@ -180,73 +201,17 @@
 </template>
 
 <script>
+import { apiService } from '@/services/api';
 export default {
   name: 'AnalyticsView',
   data() {
     return {
       selectedYear: new Date().getFullYear(),
       availableYears: [2025, 2024, 2023, 2022],
+      loading: true,
+      user: null,
       documents: [
-        {
-          id: '264917',
-          title: 'Договор поставки',
-          filename: 'Договор №154/2024.pdf',
-          type: 'Договор поставки',
-          company: 'ООО "Ромашка"',
-          date: '12.02.2025',
-          status: 'На оплате',
-          tags: ['Проект X', 'Юридический', 'Поставка']
-        },
-        {
-          id: '264918',
-          title: 'Счёт на оплату',
-          filename: 'Счёт №287.pdf',
-          type: 'Счёт',
-          company: 'ООО "Вектор"',
-          date: '23.03.2024',
-          status: 'Оплачен',
-          tags: ['Финансовый', 'Срочный']
-        },
-        {
-          id: '264919',
-          title: 'Акт выполненных работ',
-          filename: 'Акт №45/2023.pdf',
-          type: 'Акт',
-          company: 'ООО "Ромашка"',
-          date: '15.11.2023',
-          status: 'Подписан',
-          tags: ['Проект Y', 'Финансовый']
-        },
-        {
-          id: '264920',
-          title: 'Договор аренды',
-          filename: 'Договор №89/2022.pdf',
-          type: 'Договор аренды',
-          company: 'ООО "Стройсервис"',
-          date: '05.08.2022',
-          status: 'Завершен',
-          tags: ['Аренда', 'Юридический']
-        },
-        {
-          id: '264921',
-          title: 'Счёт на оплату',
-          filename: 'Счёт №301.pdf',
-          type: 'Счёт',
-          company: 'ООО "Ромашка"',
-          date: '18.06.2024',
-          status: 'Ожидает оплаты',
-          tags: ['Финансовый']
-        },
-        {
-          id: '264922',
-          title: 'Договор оказания услуг',
-          filename: 'Договор №201/2024.pdf',
-          type: 'Договор оказания услуг',
-          company: 'ООО "ТехноПрофи"',
-          date: '10.04.2024',
-          status: 'Активен',
-          tags: ['Услуги', 'Технический']
-        }
+        // ... ваш массив документов
       ],
       statistics: {
         total: 0,
@@ -283,9 +248,32 @@ export default {
     }
   },
   methods: {
+    async loadUserData() {
+      try {
+        this.user = await apiService.getCurrentUser();
+        if (!this.user) this.handleLogout();
+      } catch (error) {
+        this.handleLogout();
+      } finally {
+        this.loading = false;
+      }
+    },
+
     handleLogout() {
+      console.log('🚪 Выход из системы...');
+      apiService.clearTokens();
       this.$router.push('/login');
     },
+
+    getInitials(fullName) {
+      if (!fullName) return '??';
+      return fullName
+          .split(' ')
+          .map(name => name[0])
+          .join('')
+          .toUpperCase();
+    },
+
     updateStatistics() {
       // Фильтрация документов по году
       const filteredDocs = this.documents.filter(doc => {
@@ -309,6 +297,7 @@ export default {
       this.calculateCompanyStats(filteredDocs);
       this.calculateStatusDistribution(filteredDocs);
     },
+
     calculateTypeDistribution(docs) {
       const typeCounts = {};
 
@@ -319,13 +308,14 @@ export default {
       const total = docs.length;
 
       this.statistics.typeDistribution = Object.entries(typeCounts)
-        .map(([name, count]) => ({
-          name,
-          count,
-          percentage: total > 0 ? Math.round((count / total) * 100) : 0
-        }))
-        .sort((a, b) => b.count - a.count);
+          .map(([name, count]) => ({
+            name,
+            count,
+            percentage: total > 0 ? Math.round((count / total) * 100) : 0
+          }))
+          .sort((a, b) => b.count - a.count);
     },
+
     calculateCompanyStats(docs) {
       const companyCounts = {};
 
@@ -336,14 +326,15 @@ export default {
       const total = docs.length;
 
       this.statistics.topCompanies = Object.entries(companyCounts)
-        .map(([name, count]) => ({
-          name,
-          count,
-          percentage: total > 0 ? Math.round((count / total) * 100) : 0
-        }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 5); // Топ 5 компаний
+          .map(([name, count]) => ({
+            name,
+            count,
+            percentage: total > 0 ? Math.round((count / total) * 100) : 0
+          }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 5);
     },
+
     calculateStatusDistribution(docs) {
       const statusCounts = {};
 
@@ -354,19 +345,21 @@ export default {
       const total = docs.length;
 
       this.statistics.statusDistribution = Object.entries(statusCounts)
-        .map(([name, count]) => ({
-          name,
-          count,
-          percentage: total > 0 ? Math.round((count / total) * 100) : 0
-        }))
-        .sort((a, b) => b.count - a.count);
+          .map(([name, count]) => ({
+            name,
+            count,
+            percentage: total > 0 ? Math.round((count / total) * 100) : 0
+          }))
+          .sort((a, b) => b.count - a.count);
     },
+
     parseDate(dateString) {
       const [day, month, year] = dateString.split('.');
       return `${year}-${month}-${day}`;
     }
   },
   mounted() {
+    this.loadUserData();
     this.updateStatistics();
   }
 }
