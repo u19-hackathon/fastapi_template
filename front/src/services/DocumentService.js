@@ -4,60 +4,182 @@ class DocumentService {
   /**
    * 📥 Получение списка документов
    */
-   async getDocuments(filters = {}) {
-    console.log('📋 [DocumentService] Запрос списка документов:', {
-      filters
+ async getDocuments(filters = {}) {
+  console.log('📋 [DocumentService] Запрос списка документов:', {
+    filters
+  });
+
+  try {
+    const queryParams = new URLSearchParams();
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value && value !== '' && (!Array.isArray(value) || value.length > 0)) {
+        if (Array.isArray(value)) {
+          value.forEach(v => queryParams.append(key, v));
+        } else {
+          queryParams.append(key, value);
+        }
+      }
     });
 
-    try {
-      const queryParams = new URLSearchParams(filters).toString();
-      const url = '/storage'
+    const queryString = queryParams.toString();
+    const url = queryString ? `/storage?${queryString}` : '/storage';
 
-      const documents = await apiService.request(url);
+    console.log('🔗 [DocumentService] Запрос к API:', url);
 
-      console.log('✅ [DocumentService] Документы получены:', {
-        count: documents.length
-      });
+    const response = await apiService.request(url);
 
-      return documents;
-    } catch (error) {
-      console.log('📋 [DocumentService] Endpoint /documents не найден, используем mock данные');
+    console.log('✅ [DocumentService] Документы получены:', {
+      count: response?.length || 0,
+      response
+    });
 
-      const mockDocs = this.getMockDocuments();
-      console.log('🔄 [DocumentService] Возвращаем mock данные:', {
-        count: mockDocs.length
-      });
-      return mockDocs;
+    // ПРЕОБРАЗУЕМ ДАННЫЕ ИЗ БЭКЕНДА В ФОРМАТ ФРОНТЕНДА
+    const documents = this.transformBackendData(response || []);
+
+    console.log('🔄 [DocumentService] Преобразованные документы:', documents);
+
+    return documents;
+  } catch (error) {
+    console.error('❌ [DocumentService] Ошибка при получении документов:', error);
+
+    console.log('📋 [DocumentService] Endpoint /storage не доступен, используем mock данные');
+    return this.getMockDocuments();
+  }
+}
+
+/**
+ * Преобразует данные из бэкенда в формат фронтенда
+ */
+transformBackendData(backendDocuments) {
+  if (!Array.isArray(backendDocuments)) {
+    return [];
+  }
+
+  return backendDocuments.map(doc => {
+    // Извлекаем имя файла из file_path
+    const filename = doc.file_path ? doc.file_path.split('/').pop() : 'unknown.pdf';
+
+    // Создаем title на основе filename или используем существующий title
+    const title = doc.title || filename.replace(/\.[^/.]+$/, ""); // убираем расширение
+
+    return {
+      id: doc.id || doc.file_id,
+      title: title,
+      filename: filename,
+      type: doc.file_type || 'document', // file_type → type
+      counterparty: doc.counterparty || 'Не указан', // если нет в бэкенде
+      date: this.formatDate(doc.created_at || doc.upload_date), // преобразуем дату
+      status: doc.status || 'processed', // если нет статуса
+      size: doc.file_size ? this.formatFileSize(doc.file_size) : 'Unknown',
+      tags: doc.tags || [],
+      file_path: doc.file_path, // сохраняем оригинальные поля если нужны
+      file_type: doc.file_type,
+      file_hash: doc.file_hash
+    };
+  });
+}
+
+/**
+ * Форматирует дату в формат DD.MM.YYYY
+ */
+formatDate(dateString) {
+  if (!dateString) return '01.01.2024';
+
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ru-RU');
+  } catch {
+    return '01.01.2024';
+  }
+}
+
+/**
+ * Форматирует размер файла
+ */
+formatFileSize(bytes) {
+  if (!bytes) return 'Unknown';
+
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  if (bytes === 0) return '0 Bytes';
+
+  const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+  return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+/**
+ * Применяет фильтры к mock данным
+ */
+applyFiltersToMock(documents, filters) {
+  let filtered = [...documents];
+
+  // Поиск по тексту
+  if (filters.search) {
+    const query = filters.search.toLowerCase();
+    filtered = filtered.filter(doc =>
+      doc.title?.toLowerCase().includes(query) ||
+      doc.filename?.toLowerCase().includes(query) ||
+      doc.counterparty?.toLowerCase().includes(query)
+    );
+  }
+
+  // Фильтрация по типу
+  if (filters.type) {
+    filtered = filtered.filter(doc =>
+      doc.type?.toLowerCase() === filters.type.toLowerCase()
+    );
+  }
+
+  // Фильтрация по контрагенту
+  if (filters.counterparty) {
+    filtered = filtered.filter(doc =>
+      doc.counterparty === filters.counterparty
+    );
+  }
+
+  return filtered;
+}
+
+/**
+ * Mock данные для fallback
+ */
+getMockDocuments() {
+  return [
+    {
+      id: 1,
+      title: 'Договор поставки №123',
+      filename: 'dogovor_postavki_123.pdf',
+      type: 'contract',
+      counterparty: 'ООО "Ромашка"',
+      date: '15.12.2023',
+      status: 'processed',
+      size: '2.4 MB',
+      tags: ['договор', 'поставка', '2023']
+    },
+    {
+      id: 2,
+      title: 'Счет на оплату №456',
+      filename: 'schet_456.pdf',
+      type: 'invoice',
+      counterparty: 'ИП Иванов',
+      date: '20.12.2023',
+      status: 'pending',
+      size: '1.1 MB',
+      tags: ['счет', 'оплата']
+    },
+    {
+      id: 3,
+      title: 'Акт выполненных работ №789',
+      filename: 'akt_vypolnennyh_rabot_789.pdf',
+      type: 'act',
+      counterparty: 'ООО "Лютик"',
+      date: '25.12.2023',
+      status: 'processed',
+      size: '1.8 MB',
+      tags: ['акт', 'работы']
     }
-  }
-
-
-  getMockDocuments() {
-    return [
-      {
-        id: '264917',
-        title: 'Договор поставки',
-        filename: 'Договор №154-2024.pdf',
-        type: 'Договор',
-        counterparty: 'ООО "Ромашка"',
-        date: '12.02.2024',
-        status: 'На оплате',
-        size: '2.4 MB',
-        tags: ['Проект X', 'Юридический', 'Поставка']
-      },
-      {
-        id: '264918',
-        title: 'Счёт на оплату',
-        filename: 'Счёт №287.pdf',
-        type: 'Счёт',
-        counterparty: 'ООО "Вектор"',
-        date: '23.03.2024',
-        status: 'Оплачен',
-        size: '1.8 MB',
-        tags: ['Финансовый', 'Срочный']
-      }
-    ];
-  }
+  ];
+}
 
   /**
    * 📄 Получение документа по ID

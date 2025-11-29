@@ -640,6 +640,7 @@ export default {
   }
 },
 
+
   async loadUniqueOwners() {
   try {
     this.uniqueOwners = await filterService.getUniqueOwners();
@@ -809,6 +810,7 @@ export default {
   await Promise.all([
     this.loadDocuments(),
     this.loadAllTags(),
+    this.loadAllTypes()
   ]);
 
   if (this.documents.length > 0 && !this.selectedDocument) {
