@@ -1,13 +1,10 @@
-import asyncio
 from typing import Type, Optional
 
 from fastapi import UploadFile
 
 from src.core.config import MAX_FILE_SIZE
-from src.modules.analysis import FileMetadata, AnalysisResult, TagResult, TagSource
 from src.modules.file_save_service.file_save_service import FileSaveService
-from src.modules.parser import ParsedDocument
-from src.modules.storage.models import File, PriorityLevel, ConfidentialityLevel, SourceType, Tag
+from src.modules.storage.models import File, SourceType, Tag
 from src.modules.storage.repository import StorageRepository
 
 
@@ -67,8 +64,9 @@ class StorageService:
         self.__add_all_tags_to_file(file.id, tags, user_id)
 
     def __add_all_tags_to_file(self, file_id: int, tags: list[str], user_id: int):
-        print(tags)
+        if not tags: return
         for tag in tags:
+            if not tag: continue
             if not self.__check_tag_exists(tag):
                 self.create_tag(tag, "manual", "")
             tag_model: Tag = self.__get_tag_id_by_name(tag)

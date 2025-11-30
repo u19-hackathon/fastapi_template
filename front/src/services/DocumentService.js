@@ -251,7 +251,7 @@ getMockDocuments() {
     console.log('🗑️ [DocumentService] Удаление документа ID:', id);
 
     try {
-      const result = await apiService.request(`/documents/${id}`, {
+      const result = await apiService.request(`/storage/${id}`, {
         method: 'DELETE'
       });
 

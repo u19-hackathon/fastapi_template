@@ -101,6 +101,7 @@ INSERT INTO files (title, file_path, first_lines, user_id, category_id, source_i
 ('Договор поставки №1', '/files/documents/contract1.pdf', 'ДОГОВОР ПОСТАВКИ...', 1, 1, 1),
 ('Финансовый отчет за январь', '/files/reports/january.pdf', 'ОТЧЕТ О ПРИБЫЛИ...', 2, 2, 2),
 ('Финансовый отчет за январь', '/files/reports/january.pdf', 'ОТЧЕТ О ПРИБЫЛИ...', 7, 2, 2),
+('Финансовый отчет за январь', '/files/reports/january.pdf', 'ОТЧЕТ О ПРИБЫЛИ...', 21, 2, 2);
 
 
 INSERT INTO tags (tag_name, tag_type, description) VALUES

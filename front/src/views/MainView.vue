@@ -197,18 +197,25 @@
           <div class="preview-header">
             <h3>Предпросмотр документа</h3>
             <div class="preview-actions">
+
               <button class="btn btn-outline" title="Скачать" @click="downloadDocument(selectedDocument)">📥</button>
               <button class="btn btn-outline" title="Удалить" @click="deleteDocument(selectedDocument)">🗑️</button>
             </div>
           </div>
 
-          <div class="document-preview">
-            <div class="preview-placeholder">
-              <div class="preview-icon">📄</div>
-              <p>Предпросмотр PDF</p>
-              <button class="btn btn-outline">Открыть в полном размере</button>
-            </div>
-          </div>
+       <div class="document-preview">
+  <div class="preview-placeholder">
+    <div class="preview-icon">📄</div>
+    <p>Предпросмотр PDF</p>
+    <button
+      class="btn btn-outline"
+      @click="openPdfInNewWindow(selectedDocument)"
+      :disabled="!selectedDocument || !isPdfDocument(selectedDocument)"
+    >
+      📖 Открыть в полном размере
+    </button>
+  </div>
+</div>
 
           <div class="document-details">
             <h4>Информация о документе</h4>
@@ -801,9 +808,82 @@ export default {
     downloadDocument(document) {
       documentActionsService.downloadDocument(document.id, document.filename);
     },
-    deleteDocument(document) {
-      documentActionsService.deleteDocument(document.id, document.title);
-    },
+    async deleteDocument(document) {
+  try {
+    await documentActionsService.deleteDocument(document.id, document.title);
+
+    // 🔄 ОБНОВЛЯЕМ СПИСОК ДОКУМЕНТОВ ПОСЛЕ УДАЛЕНИЯ
+    await this.loadDocuments();
+
+    // 🔄 СБРАСЫВАЕМ ВЫБРАННЫЙ ДОКУМЕНТ ЕСЛИ УДАЛИЛИ ЕГО
+    if (this.selectedDocument?.id === document.id) {
+      this.selectedDocument = null;
+    }
+
+    notificationService.success('Документ удален');
+
+  } catch (error) {
+    console.error('Ошибка удаления документа:', error);
+    notificationService.error('Ошибка при удалении документа');
+  }
+
+},
+async openPdfInNewWindow(document) {
+  if (!document || !this.isPdfDocument(document)) return;
+
+  try {
+    console.log('🔍 Загрузка документа ID:', document.id);
+
+    const response = await fetch(`http://localhost/api/file-save/${document.id}`, {
+      headers: {
+        'Authorization': `Bearer ${apiService.accessToken}`
+      }
+    });
+
+    console.log('📥 Ответ сервера:', {
+      status: response.status,
+      statusText: response.statusText,
+      headers: Object.fromEntries(response.headers.entries())
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Ошибка сервера:', errorText);
+      throw new Error(`Ошибка загрузки: ${response.status} - ${errorText}`);
+    }
+
+    const blob = await response.blob();
+    console.log('📄 Blob информация:', {
+      size: blob.size,
+      type: blob.type
+    });
+
+    const blobUrl = URL.createObjectURL(blob);
+    const newWindow = window.open(blobUrl, '_blank', 'width=1200,height=800');
+
+    if (newWindow) {
+      newWindow.onbeforeunload = () => {
+        URL.revokeObjectURL(blobUrl);
+      };
+    } else {
+      // Если окно заблокировано, открываем в текущей вкладке
+      window.location.href = blobUrl;
+    }
+
+  } catch (error) {
+    console.error('💥 Ошибка открытия PDF:', error);
+    notificationService.error('Ошибка при открытии PDF');
+  }
+},
+
+  /**
+   * 🔍 Проверить является ли документ PDF
+   */
+  isPdfDocument(document) {
+    if (!document) return false;
+    const filename = document.filename || document.title || '';
+    return filename.toLowerCase().endsWith('.pdf');
+  }
   },
   async mounted() {
   await this.loadUserData();

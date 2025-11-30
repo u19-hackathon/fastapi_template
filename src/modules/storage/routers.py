@@ -1,5 +1,4 @@
 import os
-from sys import prefix
 from typing import Optional
 
 from fastapi import APIRouter, UploadFile, File, HTTPException
@@ -56,8 +55,8 @@ async def upload_file(
     if payload.get("type") != "access":
         raise HTTPException(status_code=401, detail="Unauthorized")
     user_id = payload.get("sub")
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+    # if not user_id:
+    #     raise HTTPException(status_code=401, detail="Unauthorized")
     await storage_service.create_files(user_id, files, tags)
     return None
 
@@ -149,7 +148,28 @@ async def get_file(
         raise HTTPException(status_code=403, detail="Forbidden")
     if not os.path.exists(file.file_path):
         raise HTTPException(status_code=404, detail="File not found on disk")
+
+    file_extension = os.path.splitext(file.file_path)[1].lower()
+
+    mime_types = {
+        '.pdf': 'application/pdf',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.gif': 'image/gif',
+        '.webp': 'image/webp',
+        '.txt': 'text/plain',
+        '.csv': 'text/csv',
+        '.html': 'text/html',
+        '.htm': 'text/html',
+        '.xml': 'application/xml',
+        '.json': 'application/json',
+    }
+
+    media_type = mime_types.get(file_extension, 'application/octet-stream')
+
     return FileResponse(
         path=file.file_path,
-        media_type='application/octet-stream'
+        media_type=media_type,
+        content_disposition_type="inline"
     )

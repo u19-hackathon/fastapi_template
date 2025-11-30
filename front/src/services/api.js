@@ -26,85 +26,106 @@ class ApiService {
      * @returns {Promise<any>} - Ответ от сервера в формате JSON
      */
     async request(endpoint, options = {}) {
-        const url = `${this.baseURL}${endpoint}`;
-
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), this.timeout);
-
-
-        const config = {
-            signal: controller.signal, // Для отмены запроса при таймауте
-            headers: {
-                'Content-Type': 'application/json', // Всегда отправляем JSON
-                ...options.headers, // Дополнительные заголовки из опций
-            },
-            ...options, // method, body и другие опции
-        };
-
-        // 🔐 ДОБАВЛЯЕМ JWT ТОКЕН В ЗАГОЛОВОК АВТОРИЗАЦИИ
-        if (this.accessToken) {
-            config.headers['Authorization'] = `Bearer ${this.accessToken}`;
-        }
-
-        console.log('📤 Отправка запроса:', {
-            method: config.method || 'GET',
-            url: url,
-            hasToken: !!this.accessToken
+    const url = `${this.baseURL}${endpoint}`;
+    console.log('🔍 Проверка localStorage:', {
+          accessToken: localStorage.getItem('accessToken'),
+          refreshToken: localStorage.getItem('refreshToken'),
+          всеКлючи: Object.keys(localStorage)
         });
 
-        try {
-            // 🚀 ВЫПОЛНЯЕМ HTTP ЗАПРОС
-            const response = await fetch(url, config);
-            clearTimeout(timeoutId); // Очищаем таймер при успешном ответе
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
-            console.log('📥 Получен ответ:', {
-                status: response.status,
-                statusText: response.statusText,
-                url: url
-            });
+    // Базовые заголовки
+    const headers = {
+        ...options.headers, // Сначала берем заголовки из опций
+    };
 
-            // 🔄 ОБРАБОТКА ПРОСРОЧЕННОГО ACCESS ТОКЕНА
-            if (response.status === 401 && this.refreshToken) {
-                console.log('🔄 Access токен просрочен, пробуем обновить...');
-                const refreshed = await this.refreshTokens();
-                if (refreshed) {
-                    console.log('✅ Токены обновлены, повторяем запрос');
-                    // Повторяем исходный запрос с новым access токеном
-                    config.headers['Authorization'] = `Bearer ${this.accessToken}`;
-                    return await fetch(url, config);
-                }
-            }
+    // 🔐 ДОБАВЛЯЕМ JWT ТОКЕН В ЗАГОЛОВОК АВТОРИЗАЦИИ
+    if (this.accessToken) {
+        headers['Authorization'] = `Bearer ${this.accessToken}`;
+    }
 
-            // ❌ ПРОВЕРЯЕМ HTTP СТАТУС ОТВЕТА
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('❌ HTTP ошибка:', {
-                    status: response.status,
-                    statusText: response.statusText,
-                    endpoint: endpoint,
-                    response: errorText
-                });
-                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-            }
+    // ❗ ВАЖНО: НЕ устанавливаем Content-Type для FormData
+    // Если body НЕ является FormData, тогда устанавливаем JSON
+    if (!(options.body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+    }
 
-            // ✅ УСПЕШНЫЙ ОТВЕТ - ПАРСИМ JSON
-            const data = await response.json();
-            console.log('✅ Запрос выполнен успешно:', {
-                endpoint: endpoint,
-                response: data
-            });
-            return data;
+    const config = {
+        signal: controller.signal,
+        headers: headers,
+        ...options, // method, body и другие опции
+    };
 
-        } catch (error) {
-            clearTimeout(timeoutId); // Всегда очищаем таймаут
-            console.error('💥 Ошибка запроса:', {
-                endpoint: endpoint,
-                error: error.message,
-                url: url
-            });
-            throw error;
+    console.log('📤 Отправка запроса:', {
+        method: config.method || 'GET',
+        url: url,
+        hasToken: !!this.accessToken,
+        isFormData: options.body instanceof FormData
+    });
+
+    // Для отладки FormData
+    if (options.body instanceof FormData) {
+        console.log('📎 FormData содержимое:');
+        for (let [key, value] of options.body.entries()) {
+            console.log(`  ${key}:`, value);
         }
     }
+
+    try {
+        // 🚀 ВЫПОЛНЯЕМ HTTP ЗАПРОС
+        const response = await fetch(url, config);
+        clearTimeout(timeoutId);
+
+        console.log('📥 Получен ответ:', {
+            status: response.status,
+            statusText: response.statusText,
+            url: url
+        });
+
+        // 🔄 ОБРАБОТКА ПРОСРОЧЕННОГО ACCESS ТОКЕНА
+        if (response.status === 401 && this.refreshToken) {
+            console.log('🔄 Access токен просрочен, пробуем обновить...');
+            const refreshed = await this.refreshTokens();
+            if (refreshed) {
+                console.log('✅ Токены обновлены, повторяем запрос');
+                // Повторяем исходный запрос с новым access токеном
+                config.headers['Authorization'] = `Bearer ${this.accessToken}`;
+                return await fetch(url, config);
+            }
+        }
+
+        // ❌ ПРОВЕРЯЕМ HTTP СТАТУС ОТВЕТА
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ HTTP ошибка:', {
+                status: response.status,
+                statusText: response.statusText,
+                endpoint: endpoint,
+                response: errorText
+            });
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+
+        // ✅ УСПЕШНЫЙ ОТВЕТ - ПАРСИМ JSON
+        const data = await response.json();
+        console.log('✅ Запрос выполнен успешно:', {
+            endpoint: endpoint,
+            response: data
+        });
+        return data;
+
+    } catch (error) {
+        clearTimeout(timeoutId);
+        console.error('💥 Ошибка запроса:', {
+            endpoint: endpoint,
+            error: error.message,
+            url: url
+        });
+        throw error;
+    }
+}
 
     /**
      * 🔄 ОБНОВЛЕНИЕ JWT ТОКЕНОВ С ИСПОЛЬЗОВАНИЕМ REFRESH ТОКЕНА
